@@ -26,6 +26,16 @@ public class Startup
         });
         services.AddScoped<INewsSiteService, NewsSiteService>();
 
+        services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(builder =>
+            {
+                builder.WithOrigins("http://localhost:3000") // Add your frontend URL here
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            });
+        });
+
         // Add other services, dependencies, and configurations as needed
     }
 
@@ -48,6 +58,8 @@ public class Startup
             var dbContext = serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             DataSeed.Initialize(dbContext);
         }
+
+        app.UseCors();
 
         // Configure other middleware, routing, and endpoints
     }
