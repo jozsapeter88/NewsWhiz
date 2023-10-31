@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using server.Models.DBContext;
+using server.Services;
 
 public class Startup
 {
@@ -23,6 +24,7 @@ public class Startup
             options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"));
             options.EnableSensitiveDataLogging();
         });
+        services.AddScoped<INewsSiteService, NewsSiteService>();
 
         // Add other services, dependencies, and configurations as needed
     }
