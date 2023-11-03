@@ -1,28 +1,64 @@
 import React, { useState } from 'react';
 
-function MainPage() {
+function WebScraper() {
   const [selectedWebsite, setSelectedWebsite] = useState('');
-  const [titleXPath, setTitleXPath] = useState(''); // Custom XPath for title
-  const [articleXPath, setArticleXPath] = useState(''); // Custom XPath for article
   const [url, setUrl] = useState('');
   const [title, setTitle] = useState('');
   const [article, setArticle] = useState('');
+
+  const handleWebsiteChange = (selectedWebsite) => {
+    setSelectedWebsite(selectedWebsite);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const requestData = {
       selectedWebsite,
-      titleXPath,
-      articleXPath,
       url,
     };
 
-    // Send a POST request with requestData to the backend
+    try {
+      const response = await fetch("http://localhost:5092/api/", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
 
-    // On the server side, use HtmlAgilityPack and requestData to scrape data
+      if (response.ok) {
+        console.log("yeah boy");
+      } else {
+        console.log("nem yeah boy");
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
 
-    // Set the title and article state based on the scraped data
+    // try {
+    //   const response = await fetch('http://localhost:5092/api/newssite/scrape', {
+    //     method: 'POST',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //     },
+    //     body: JSON.stringify(requestData),
+    //   });
+      
+    //   if (response.ok) {
+    //     const data = await response.json();
+    //     setTitle(data.title);
+    //     setArticle(data.article);
+    //   } else {
+    //     console.log(requestData);
+    //     console.error('Error scraping website');
+    //     setTitle('Error');
+    //     setArticle('Error');
+    //   }
+    // } catch (error) {
+    //   console.error('Error fetching data:', error);
+    //   setTitle('Error');
+    //   setArticle('Error');
+    // }
   };
 
   return (
@@ -30,31 +66,11 @@ function MainPage() {
       <form onSubmit={handleSubmit}>
         <label>
           Select a website:
-          <select value={selectedWebsite} onChange={(e) => setSelectedWebsite(e.target.value)}>
+          <select value={selectedWebsite} onChange={(e) => handleWebsiteChange(e.target.value)}>
             <option value="BBC">BBC</option>
             <option value="Index">Index</option>
             {/* Add options for other available websites */}
           </select>
-        </label>
-        <br />
-        <label>
-          Custom XPath for Title:
-          <input
-            type="text"
-            value={titleXPath}
-            onChange={(e) => setTitleXPath(e.target.value)}
-            placeholder="//h1[@class='custom-title']" // Placeholder for guidance
-          />
-        </label>
-        <br />
-        <label>
-          Custom XPath for Article:
-          <input
-            type="text"
-            value={articleXPath}
-            onChange={(e) => setArticleXPath(e.target.value)}
-            placeholder="//div[@class='custom-article']" // Placeholder for guidance
-          />
         </label>
         <br />
         <label>
@@ -72,4 +88,4 @@ function MainPage() {
   );
 }
 
-export default MainPage;
+export default WebScraper;

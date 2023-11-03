@@ -1,11 +1,11 @@
-﻿using System.Net;
-using HtmlAgilityPack;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using server.Models;
 using server.Services;
 
-[Route("api/news-sites")]
+namespace server.Controllers;
+
 [ApiController]
+[Route("api")]
 public class NewsSiteController : ControllerBase
 {
     private readonly INewsSiteService _newsSiteService;
@@ -41,54 +41,28 @@ public class NewsSiteController : ControllerBase
         var newsSites = _newsSiteService.GetAllNewsSites();
         return Ok(newsSites);
     }
+    
+    [HttpGet]
+    public IActionResult Test()
+    {
+        
+        return Ok();
+    }
 
-    [HttpPost]
-    [Route("scrape")]
+    [HttpPost("scrape")]
     public IActionResult ScrapeWebsite([FromBody] ScrapeRequest request)
     {
         if (websiteMappings.TryGetValue(request.SelectedWebsite, out var xPathMappings))
         {
-            if (!string.IsNullOrWhiteSpace(request.TitleXPath))
+            var scrapedData = _newsSiteService.ScrapeWebsite(request.Url, xPathMappings.titleXPath, xPathMappings.articleXPath);
+
+            if (scrapedData != null)
             {
-                xPathMappings.titleXPath = request.TitleXPath;
+                return Ok(scrapedData);
             }
-
-            if (!string.IsNullOrWhiteSpace(request.ArticleXPath))
+            else
             {
-                xPathMappings.articleXPath = request.ArticleXPath;
-            }
-
-            try
-            {
-                var httpClient = new HttpClient();
-                var html = httpClient.GetStringAsync(request.Url).Result;
-                var htmlDocument = new HtmlDocument();
-                htmlDocument.LoadHtml(html);
-
-                var titleElement = htmlDocument.DocumentNode.SelectSingleNode(xPathMappings.titleXPath);
-                var articleElement = htmlDocument.DocumentNode.SelectSingleNode(xPathMappings.articleXPath);
-
-                if (titleElement != null && articleElement != null)
-                {
-                    var title = WebUtility.HtmlDecode(titleElement.InnerText);
-                    var article = WebUtility.HtmlDecode(articleElement.InnerText);
-
-                    var newsArticle = new NewsArticle
-                    {
-                        Title = title,
-                        Article = article
-                    };
-
-                    return Ok(newsArticle);
-                }
-                else
-                {
-                    return BadRequest("Title or article element not found on the page.");
-                }
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, "An error occurred while scraping the website: " + ex.Message);
+                return BadRequest("Title or article element not found on the page.");
             }
         }
         else
@@ -96,6 +70,7 @@ public class NewsSiteController : ControllerBase
             return BadRequest("Invalid website selection. Please choose a valid website.");
         }
     }
+
 
 
 }

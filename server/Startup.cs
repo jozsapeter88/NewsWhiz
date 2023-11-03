@@ -1,9 +1,4 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+﻿/* using Microsoft.EntityFrameworkCore;
 using server.Models.DBContext;
 using server.Services;
 
@@ -24,13 +19,15 @@ public class Startup
             options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"));
             options.EnableSensitiveDataLogging();
         });
+        services.AddControllers();
+        
         services.AddScoped<INewsSiteService, NewsSiteService>();
-
+        
         services.AddCors(options =>
         {
             options.AddDefaultPolicy(builder =>
             {
-                builder.WithOrigins("http://localhost:3000") // Add your frontend URL here
+                builder.WithOrigins("http://192.168.56.1:3000", "http://localhost:3000") // Add your frontend URL here
                     .AllowAnyMethod()
                     .AllowAnyHeader();
             });
@@ -64,3 +61,4 @@ public class Startup
         // Configure other middleware, routing, and endpoints
     }
 }
+*/
