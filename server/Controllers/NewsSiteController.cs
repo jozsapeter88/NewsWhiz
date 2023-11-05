@@ -5,7 +5,7 @@ using server.Services;
 namespace server.Controllers;
 
 [ApiController]
-[Route("api")]
+[Route("api/[controller]")]
 public class NewsSiteController : ControllerBase
 {
     private readonly INewsSiteService _newsSiteService;
@@ -34,19 +34,11 @@ public class NewsSiteController : ControllerBase
             },
         };
 
-    [HttpGet]
-    [Route("getAllNewsSites")]
+    [HttpGet("getAllNewsSites")]
     public IActionResult GetAllNewsSites()
     {
         var newsSites = _newsSiteService.GetAllNewsSites();
         return Ok(newsSites);
-    }
-    
-    [HttpGet]
-    public IActionResult Test()
-    {
-        
-        return Ok();
     }
 
     [HttpPost("scrape")]

@@ -1,64 +1,62 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from "react";
 
-function WebScraper() {
-  const [selectedWebsite, setSelectedWebsite] = useState('');
-  const [url, setUrl] = useState('');
-  const [title, setTitle] = useState('');
-  const [article, setArticle] = useState('');
+function MainPage() {
+  const [newsSites, setNewsSites] = useState([]);
+  const [selectedSite, setSelectedSite] = useState("");
+  const [url, setUrl] = useState("");
+  const [title, setTitle] = useState("");
+  const [article, setArticle] = useState("");
 
-  const handleWebsiteChange = (selectedWebsite) => {
-    setSelectedWebsite(selectedWebsite);
-  };
+  useEffect(() => {
+    fetch("http://localhost:5092/api/NewsSite/getAllNewsSites")
+      .then((response) => response.json())
+      .then((data) => {
+        setNewsSites(data);
+        console.log("News sites fetched successfully:", data);
+      })
+      .catch((error) => console.error("Error fetching news sites:", error));
+  }, []);
+
+  const handleSiteChange = (e) => {
+    const selectedWebsite = e.target.value;
+    setSelectedSite(selectedWebsite);
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const requestData = {
-      selectedWebsite,
+      selectedSite,
       url,
     };
 
     try {
-      const response = await fetch("http://localhost:5092/api/", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        "http://localhost:5092/api/NewsSite/scrape",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestData),
+        }
+      );
 
       if (response.ok) {
-        console.log("yeah boy");
+        const data = await response.json();
+        setTitle(data.title);
+        setArticle(data.article);
       } else {
-        console.log("nem yeah boy");
+        console.log(requestData);
+        console.error("Error scraping website");
+        setTitle("Error");
+        setArticle("Error");
       }
     } catch (error) {
       console.error("Error fetching data:", error);
+      setTitle("Error");
+      setArticle("Error");
     }
-
-    // try {
-    //   const response = await fetch('http://localhost:5092/api/newssite/scrape', {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify(requestData),
-    //   });
-      
-    //   if (response.ok) {
-    //     const data = await response.json();
-    //     setTitle(data.title);
-    //     setArticle(data.article);
-    //   } else {
-    //     console.log(requestData);
-    //     console.error('Error scraping website');
-    //     setTitle('Error');
-    //     setArticle('Error');
-    //   }
-    // } catch (error) {
-    //   console.error('Error fetching data:', error);
-    //   setTitle('Error');
-    //   setArticle('Error');
-    // }
   };
 
   return (
@@ -66,16 +64,23 @@ function WebScraper() {
       <form onSubmit={handleSubmit}>
         <label>
           Select a website:
-          <select value={selectedWebsite} onChange={(e) => handleWebsiteChange(e.target.value)}>
-            <option value="BBC">BBC</option>
-            <option value="Index">Index</option>
-            {/* Add options for other available websites */}
+          <select value={selectedSite} onChange={handleSiteChange}>
+            <option value="">Select an option</option>
+            {newsSites.map((site) => (
+              <option key={site.newsSiteId} value={site.name}>
+                {site.name}
+              </option>
+            ))}
           </select>
         </label>
         <br />
         <label>
           Enter the URL to scrape:
-          <input type="text" value={url} onChange={(e) => setUrl(e.target.value)} />
+          <input
+            type="text"
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+          />
         </label>
         <br />
         <button type="submit">Scrape</button>
@@ -88,4 +93,4 @@ function WebScraper() {
   );
 }
 
-export default WebScraper;
+export default MainPage;
