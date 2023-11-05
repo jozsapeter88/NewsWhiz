@@ -69,15 +69,19 @@ function MainPage() {
       setLoading(false);
     }
   };
-  
-  const cleanedArticle = article.replace(/\s+/g, ' ').trim();
+
+  const cleanedArticle = article.replace(/\s+/g, " ").trim();
 
   return (
     <div className="main-container">
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label>Select a website:</label>
-          <select className="select-site" value={selectedSite} onChange={handleSiteChange}>
+          <select
+            className="select-site"
+            value={selectedSite}
+            onChange={handleSiteChange}
+          >
             <option value="">Select an option</option>
             {newsSites.map((site) => (
               <option key={site.newsSiteId} value={site.name}>
@@ -89,37 +93,45 @@ function MainPage() {
         <div className="form-group">
           <label>Enter the URL to scrape:</label>
           <input
-            className="url-input" 
+            className="url-input"
             type="text"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
           />
         </div>
-        <Button className="scrape-button" type="submit">Scrape</Button>
+        <Button className="scrape-button" type="submit">
+          Scrape
+        </Button>
       </form>
-      <div className="result-container">
-        {loading ? (
-          <Spinner className="loading-spinner" animation="border" variant="primary" />
-        ) : (
-          <div>
-            <h2>Title: {title}</h2>
-            <p className="article-text">Article: {cleanedArticle}</p>
+      <div>
+        {loading && (
+          <div className="loading-spinner-container">
+            <div class="loader"></div>
           </div>
         )}
+
+        <div className="result-container">
+          <h2>Title: {title}</h2>
+          <p className="article-text">Article: {cleanedArticle}</p>
+        </div>
       </div>
 
       <Modal show={showErrorModal} onHide={handleCloseErrorModal}>
         <Modal.Header closeButton>
           <Modal.Title>An error occurred</Modal.Title>
         </Modal.Header>
-        <Modal.Body>Check your URL format ("https://www.example.com") or choose the correct webpage.</Modal.Body>
+        <Modal.Body>
+          Check your URL format ("https://www.example.com") or choose the
+          correct webpage.
+        </Modal.Body>
         <Modal.Footer>
-          <Button variant="primary" onClick={handleCloseErrorModal}>Close</Button>
+          <Button variant="primary" onClick={handleCloseErrorModal}>
+            Close
+          </Button>
         </Modal.Footer>
       </Modal>
     </div>
   );
 }
-
 
 export default MainPage;
