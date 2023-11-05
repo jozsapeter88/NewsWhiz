@@ -13,6 +13,11 @@ public class NewsSiteService : INewsSiteService
         _context = context;
     }
 
+    public NewsSite GetNewsSiteByName(string name)
+    {
+        return _context.NewsSites.FirstOrDefault(newsSite => newsSite.Name == name);
+    }
+    
     public List<NewsSite> GetAllNewsSites()
     {
         return _context.NewsSites.ToList();

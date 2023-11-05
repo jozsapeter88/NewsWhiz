@@ -15,25 +15,6 @@ public class NewsSiteController : ControllerBase
         _newsSiteService = newsSiteService;
     }
 
-    private readonly Dictionary<string, (string titleXPath, string articleXPath)> websiteMappings =
-        new Dictionary<string, (string, string)>
-        {
-            {
-                "BBC",
-                (
-                    "//h1[@class='article-headline__text b-reith-sans-font b-font-weight-300']",
-                    "//div[@class='article__body-content']"
-                )
-            },
-            {
-                "Index",
-                (
-                    "//div[@class='content-title']",
-                    "//div[@class='cikk-torzs']"
-                )
-            },
-        };
-
     [HttpGet("getAllNewsSites")]
     public IActionResult GetAllNewsSites()
     {
@@ -44,9 +25,15 @@ public class NewsSiteController : ControllerBase
     [HttpPost("scrape")]
     public IActionResult ScrapeWebsite([FromBody] ScrapeRequest request)
     {
-        if (websiteMappings.TryGetValue(request.selectedSite, out var xPathMappings))
+        var selectedSiteData = _newsSiteService.GetNewsSiteByName(request.selectedSite);
+
+        if (selectedSiteData != null)
         {
-            var scrapedData = _newsSiteService.ScrapeWebsite(request.url, xPathMappings.titleXPath, xPathMappings.articleXPath);
+            var scrapedData = _newsSiteService.ScrapeWebsite(
+                request.url, 
+                selectedSiteData.TitleXPath, 
+                selectedSiteData.ArticleXPath
+            );
 
             if (scrapedData != null)
             {
@@ -62,6 +49,7 @@ public class NewsSiteController : ControllerBase
             return BadRequest("Invalid website selection. Please choose a valid website.");
         }
     }
+
 
 
 

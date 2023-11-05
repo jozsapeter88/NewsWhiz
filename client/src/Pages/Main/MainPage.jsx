@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Spinner } from "react-bootstrap";
+import { Spinner, Modal, Button } from "react-bootstrap";
 
 function MainPage() {
   const [newsSites, setNewsSites] = useState([]);
@@ -8,6 +8,7 @@ function MainPage() {
   const [title, setTitle] = useState("");
   const [article, setArticle] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showErrorModal, setShowErrorModal] = useState(false);
 
   useEffect(() => {
     fetch("http://localhost:5092/api/NewsSite/getAllNewsSites")
@@ -22,6 +23,10 @@ function MainPage() {
   const handleSiteChange = (e) => {
     const selectedWebsite = e.target.value;
     setSelectedSite(selectedWebsite);
+  };
+
+  const handleCloseErrorModal = () => {
+    setShowErrorModal(false);
   };
 
   const handleSubmit = async (e) => {
@@ -51,8 +56,9 @@ function MainPage() {
       } else {
         console.log(requestData);
         console.error("Error scraping website");
-        setTitle("Error");
-        setArticle("Error");
+        setTitle("");
+        setArticle("");
+        setShowErrorModal(true);
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -87,7 +93,7 @@ function MainPage() {
           />
         </label>
         <br />
-        <button type="submit">Scrape</button>
+        <Button>Scrape</Button>
       </form>
       <div>
         {loading ? (
@@ -99,6 +105,18 @@ function MainPage() {
           </div>
         )}
       </div>
+
+      <Modal show={showErrorModal} onHide={handleCloseErrorModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>An error occurred</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Check your URL format ("https://www.example.com") or choose the correct webpage.</Modal.Body>
+        <Modal.Footer>
+          <Button variant="primary" onClick={handleCloseErrorModal}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }
