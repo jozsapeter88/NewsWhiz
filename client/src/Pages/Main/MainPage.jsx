@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Spinner, Modal, Button } from "react-bootstrap";
+import "./MainPage.css";
 
 function MainPage() {
   const [newsSites, setNewsSites] = useState([]);
@@ -68,13 +69,15 @@ function MainPage() {
       setLoading(false);
     }
   };
+  
+  const cleanedArticle = article.replace(/\s+/g, ' ').trim();
 
   return (
-    <div>
+    <div className="main-container">
       <form onSubmit={handleSubmit}>
-        <label>
-          Select a website:
-          <select value={selectedSite} onChange={handleSiteChange}>
+        <div className="form-group">
+          <label>Select a website:</label>
+          <select className="select-site" value={selectedSite} onChange={handleSiteChange}>
             <option value="">Select an option</option>
             {newsSites.map((site) => (
               <option key={site.newsSiteId} value={site.name}>
@@ -82,26 +85,25 @@ function MainPage() {
               </option>
             ))}
           </select>
-        </label>
-        <br />
-        <label>
-          Enter the URL to scrape:
+        </div>
+        <div className="form-group">
+          <label>Enter the URL to scrape:</label>
           <input
+            className="url-input" 
             type="text"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
           />
-        </label>
-        <br />
-        <Button>Scrape</Button>
+        </div>
+        <Button className="scrape-button" type="submit">Scrape</Button>
       </form>
-      <div>
+      <div className="result-container">
         {loading ? (
-          <Spinner animation="border" variant="primary" />
+          <Spinner className="loading-spinner" animation="border" variant="primary" />
         ) : (
           <div>
             <h2>Title: {title}</h2>
-            <p>Article: {article}</p>
+            <p className="article-text">Article: {cleanedArticle}</p>
           </div>
         )}
       </div>
@@ -112,13 +114,12 @@ function MainPage() {
         </Modal.Header>
         <Modal.Body>Check your URL format ("https://www.example.com") or choose the correct webpage.</Modal.Body>
         <Modal.Footer>
-          <Button variant="primary" onClick={handleCloseErrorModal}>
-            Close
-          </Button>
+          <Button variant="primary" onClick={handleCloseErrorModal}>Close</Button>
         </Modal.Footer>
       </Modal>
     </div>
   );
 }
+
 
 export default MainPage;

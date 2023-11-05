@@ -1,0 +1,38 @@
+/* MainPage.css */
+
+.main-container {
+    padding: 20px;
+    text-align: center; /* Center align its children */
+  }
+  
+  .form-group {
+    margin-bottom: 10px;
+  }
+  
+  .select-site {
+    width: 100%;
+  }
+  
+  .url-input {
+    width: 100%;
+  }
+  
+  .scrape-button {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  .result-container {
+    margin-top: 20px;
+    display: inline-block; /* Display as inline-block for center alignment */
+    width: 80%;
+  }
+  .loading-spinner {
+    margin: 0 auto;
+    display: block;
+  }
+  
+  .article-text {
+    white-space: pre-wrap;
+  }
+  
