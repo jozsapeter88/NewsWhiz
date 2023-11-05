@@ -44,13 +44,13 @@ public class NewsSiteController : ControllerBase
     [HttpPost("scrape")]
     public IActionResult ScrapeWebsite([FromBody] ScrapeRequest request)
     {
-        if (websiteMappings.TryGetValue(request.SelectedWebsite, out var xPathMappings))
+        if (websiteMappings.TryGetValue(request.selectedSite, out var xPathMappings))
         {
-            var scrapedData = _newsSiteService.ScrapeWebsite(request.Url, xPathMappings.titleXPath, xPathMappings.articleXPath);
+            var scrapedData = _newsSiteService.ScrapeWebsite(request.url, xPathMappings.titleXPath, xPathMappings.articleXPath);
 
             if (scrapedData != null)
             {
-                return Ok(scrapedData);
+                return Ok(scrapedData);  // Return the scraped data as JSON
             }
             else
             {
@@ -62,6 +62,7 @@ public class NewsSiteController : ControllerBase
             return BadRequest("Invalid website selection. Please choose a valid website.");
         }
     }
+
 
 
 

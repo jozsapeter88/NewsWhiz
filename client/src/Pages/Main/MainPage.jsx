@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Spinner } from "react-bootstrap";
 
 function MainPage() {
   const [newsSites, setNewsSites] = useState([]);
@@ -6,6 +7,7 @@ function MainPage() {
   const [url, setUrl] = useState("");
   const [title, setTitle] = useState("");
   const [article, setArticle] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetch("http://localhost:5092/api/NewsSite/getAllNewsSites")
@@ -20,11 +22,11 @@ function MainPage() {
   const handleSiteChange = (e) => {
     const selectedWebsite = e.target.value;
     setSelectedSite(selectedWebsite);
-  }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    setLoading(true);
     const requestData = {
       selectedSite,
       url,
@@ -56,6 +58,8 @@ function MainPage() {
       console.error("Error fetching data:", error);
       setTitle("Error");
       setArticle("Error");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -86,8 +90,14 @@ function MainPage() {
         <button type="submit">Scrape</button>
       </form>
       <div>
-        <h2>Title: {title}</h2>
-        <p>Article: {article}</p>
+        {loading ? (
+          <Spinner animation="border" variant="primary" />
+        ) : (
+          <div>
+            <h2>Title: {title}</h2>
+            <p>Article: {article}</p>
+          </div>
+        )}
       </div>
     </div>
   );
