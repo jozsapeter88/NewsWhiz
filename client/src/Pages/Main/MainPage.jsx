@@ -10,6 +10,7 @@ function MainPage() {
   const [article, setArticle] = useState("");
   const [loading, setLoading] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
+  const [generatedKeywords, setGeneratedKeywords] = useState([]);
 
   useEffect(() => {
     fetch("http://localhost:5092/api/NewsSite/getAllNewsSites")
@@ -72,6 +73,36 @@ function MainPage() {
 
   const cleanedArticle = article.replace(/\s+/g, " ").trim();
 
+  const generateKeywords = async () => {
+    // Define the article text that you want to send to OpenAI
+    const url = "https://microsoft-text-analytics1.p.rapidapi.com/keyPhrases";
+    const options = {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "X-RapidAPI-Key": "21ab335ba4msh85f8c88bb6ae3f6p14ac31jsn78a47852eb0d",
+        "X-RapidAPI-Host": "microsoft-text-analytics1.p.rapidapi.com",
+      },
+      body: JSON.stringify({
+        documents: [
+          {
+            id: '1',
+            language: 'en',
+            text: cleanedArticle
+          }
+        ]
+      })
+    };
+
+    try {
+      const response = await fetch(url, options);
+      const result = await response.text();
+      console.log(result);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="main-container">
       <form onSubmit={handleSubmit}>
@@ -130,6 +161,15 @@ function MainPage() {
           </Button>
         </Modal.Footer>
       </Modal>
+      <button onClick={generateKeywords}>Generate Keywords</button>
+      <div className="generated-keywords">
+        <h3>Generated Keywords:</h3>
+        <ul>
+          {generatedKeywords.map((keyword, index) => (
+            <li key={index}>{keyword}</li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }
