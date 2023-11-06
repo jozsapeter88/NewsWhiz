@@ -11,6 +11,7 @@ function MainPage() {
   const [loading, setLoading] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [generatedKeywords, setGeneratedKeywords] = useState([]);
+  const [languageDetectionResult, setLanguageDetectionResult] = useState(null);
 
   useEffect(() => {
     fetch("http://localhost:5092/api/NewsSite/getAllNewsSites")
@@ -74,7 +75,6 @@ function MainPage() {
   const cleanedArticle = article.replace(/\s+/g, " ").trim();
 
   const generateKeywords = async () => {
-    // Define the article text that you want to send to OpenAI
     const url = "https://microsoft-text-analytics1.p.rapidapi.com/keyPhrases";
     const options = {
       method: "POST",
@@ -92,6 +92,35 @@ function MainPage() {
           }
         ]
       })
+    };
+
+    try {
+      const response = await fetch(url, options);
+      const result = await response.text();
+      console.log(result);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const detectLanguage = async () => {
+    const url = 'https://microsoft-text-analytics1.p.rapidapi.com/languages';
+    const options = {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'X-RapidAPI-Key': '21ab335ba4msh85f8c88bb6ae3f6p14ac31jsn78a47852eb0d',
+        'X-RapidAPI-Host': 'microsoft-text-analytics1.p.rapidapi.com'
+      },
+      body: JSON.stringify({
+        documents: [
+          {
+            countryHint: 'US',
+            id: '1',
+            text: cleanedArticle
+          },
+        ],
+      }),
     };
 
     try {
@@ -161,15 +190,24 @@ function MainPage() {
           </Button>
         </Modal.Footer>
       </Modal>
-      <button onClick={generateKeywords}>Generate Keywords</button>
-      <div className="generated-keywords">
+
+      <Button onClick={generateKeywords}>Generate Keywords</Button>
         <h3>Generated Keywords:</h3>
+      <div className="generated-keywords">
         <ul>
           {generatedKeywords.map((keyword, index) => (
             <li key={index}>{keyword}</li>
           ))}
         </ul>
       </div>
+      
+      <Button onClick={detectLanguage}>Detect Language</Button>
+      <h2>Detected Language:</h2>
+      {languageDetectionResult && (
+        <div>
+          <p>{languageDetectionResult}</p>
+        </div>
+      )}
     </div>
   );
 }
