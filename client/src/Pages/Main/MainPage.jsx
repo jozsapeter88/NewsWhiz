@@ -13,6 +13,7 @@ function MainPage() {
   const [generatedKeywords, setGeneratedKeywords] = useState([]);
   const [languageDetectionResult, setLanguageDetectionResult] = useState(null);
   const [summaryResult, setSummaryResult] = useState("");
+  const [sentimentAnalysisResult, setSentimentAnalysisResult] = useState("");
 
   useEffect(() => {
     fetch("http://localhost:5092/api/NewsSite/getAllNewsSites")
@@ -57,6 +58,8 @@ function MainPage() {
         const data = await response.json();
         setTitle(data.title);
         setArticle(data.article);
+        await summarizeText();
+        setSummaryResult(summaryResult);
       } else {
         console.log(requestData);
         console.error("Error scraping website");
@@ -88,22 +91,21 @@ function MainPage() {
       body: JSON.stringify({
         language: "english",
         summary_percent: 10,
-        text: cleanedArticle
-      }
-      )
-};
-  try {
-    const response = await fetch(url, options);
-    const result = await response.json(); // Parse response as JSON
+        text: cleanedArticle,
+      }),
+    };
+    try {
+      const response = await fetch(url, options);
+      const result = await response.json();
 
-    if (result.ok) {
-      setSummaryResult(result.summary); // Set the summary in state
-    } else {
-      console.error("Error in summarization:", result.msg);
+      if (result.ok) {
+        setSummaryResult(result.summary);
+      } else {
+        console.error("Error in summarization:", result.msg);
+      }
+    } catch (error) {
+      console.error(error);
     }
-  } catch (error) {
-    console.error(error);
-  }
   };
 
   const generateKeywords = async () => {
@@ -118,25 +120,26 @@ function MainPage() {
       body: JSON.stringify({
         documents: [
           {
-            id: '1',
-            language: 'en',
-            text: summaryResult
-          }
-        ]
-      })
+            id: "1",
+            language: "en",
+            text: summaryResult,
+          },
+        ],
+      }),
     };
 
     try {
       const response = await fetch(url, options);
-      const result = await response.json(); // Parse response as JSON
-    
+      const result = await response.json();
+
       if (result.documents && result.documents.length > 0) {
         const keyPhrases = result.documents[0].keyPhrases;
-    
+
         if (keyPhrases && keyPhrases.length > 0) {
-          // Add double quotes to each keyword
-          const formattedKeywords = keyPhrases.map(keyword => `"${keyword}"`).join(" ");
-          setGeneratedKeywords(formattedKeywords); // Set formatted keywords in state
+          const formattedKeywords = keyPhrases
+            .map((keyword) => `"${keyword}"`)
+            .join(" ");
+          setGeneratedKeywords(formattedKeywords);
         } else {
           console.error("No key phrases found in the response");
         }
@@ -146,24 +149,23 @@ function MainPage() {
     } catch (error) {
       console.error(error);
     }
-    
   };
 
   const detectLanguage = async () => {
-    const url = 'https://microsoft-text-analytics1.p.rapidapi.com/languages';
+    const url = "https://microsoft-text-analytics1.p.rapidapi.com/languages";
     const options = {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'content-type': 'application/json',
-        'X-RapidAPI-Key': '21ab335ba4msh85f8c88bb6ae3f6p14ac31jsn78a47852eb0d',
-        'X-RapidAPI-Host': 'microsoft-text-analytics1.p.rapidapi.com'
+        "content-type": "application/json",
+        "X-RapidAPI-Key": "21ab335ba4msh85f8c88bb6ae3f6p14ac31jsn78a47852eb0d",
+        "X-RapidAPI-Host": "microsoft-text-analytics1.p.rapidapi.com",
       },
       body: JSON.stringify({
         documents: [
           {
-            countryHint: 'US',
-            id: '1',
-            text: summaryResult
+            countryHint: "US",
+            id: "1",
+            text: summaryResult,
           },
         ],
       }),
@@ -172,10 +174,10 @@ function MainPage() {
     try {
       const response = await fetch(url, options);
       const result = await response.json();
-  
+
       if (result.documents && result.documents.length > 0) {
         const detectedLanguage = result.documents[0].detectedLanguage;
-  
+
         if (detectedLanguage) {
           const languageName = detectedLanguage.name;
           console.log(languageName);
@@ -185,6 +187,37 @@ function MainPage() {
         }
       } else {
         console.error("Invalid response format");
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const analyzeSentiment = async () => {
+    const url =
+      "https://text-analysis12.p.rapidapi.com/sentiment-analysis/api/v1.1";
+    const options = {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "X-RapidAPI-Key": "21ab335ba4msh85f8c88bb6ae3f6p14ac31jsn78a47852eb0d",
+        "X-RapidAPI-Host": "text-analysis12.p.rapidapi.com",
+      },
+      body: JSON.stringify({
+        language: "english",
+        text: summaryResult,
+      }),
+    };
+
+    try {
+      const response = await fetch(url, options);
+      const result = await response.json();
+
+      if (result.sentiment) {
+        console.log(result.sentiment);
+        setSentimentAnalysisResult(result.sentiment);
+      } else {
+        console.error("Sentiment field not found in the response");
       }
     } catch (error) {
       console.error(error);
@@ -251,22 +284,30 @@ function MainPage() {
       </Modal>
 
       <Button onClick={summarizeText}>Summarize</Button>
-        <h3>Summary:</h3>
+      <h3>Summary:</h3>
       <div className="summarize">
-      <p>{summaryResult}</p>
+        <p>{summaryResult}</p>
       </div>
 
       <Button onClick={generateKeywords}>Generate Keywords</Button>
-        <h3>Generated Keywords:</h3>
+      <h3>Generated Keywords:</h3>
       <div className="generated-keywords">
         <p>{generatedKeywords}</p>
       </div>
-      
+
       <Button onClick={detectLanguage}>Detect Language</Button>
       <h2>Detected Language:</h2>
       {languageDetectionResult && (
         <div>
           <p>{languageDetectionResult}</p>
+        </div>
+      )}
+
+      <Button onClick={analyzeSentiment}>Analyse Sentiment</Button>
+      <h2>Detected Sentiment:</h2>
+      {sentimentAnalysisResult && (
+        <div>
+          <p>{sentimentAnalysisResult}</p>
         </div>
       )}
     </div>
