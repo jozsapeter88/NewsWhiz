@@ -12,6 +12,7 @@ function MainPage() {
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [generatedKeywords, setGeneratedKeywords] = useState([]);
   const [languageDetectionResult, setLanguageDetectionResult] = useState(null);
+  const [summaryResult, setSummaryResult] = useState("");
 
   useEffect(() => {
     fetch("http://localhost:5092/api/NewsSite/getAllNewsSites")
@@ -74,6 +75,33 @@ function MainPage() {
 
   const cleanedArticle = article.replace(/\s+/g, " ").trim();
 
+  const summarizeText = async () => {
+    const url =
+      "https://text-analysis12.p.rapidapi.com/summarize-text/api/v1.1";
+    const options = {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "X-RapidAPI-Key": "21ab335ba4msh85f8c88bb6ae3f6p14ac31jsn78a47852eb0d",
+        "X-RapidAPI-Host": "text-analysis12.p.rapidapi.com",
+      },
+      body: JSON.stringify({
+        language: "english",
+        summary_percent: 10,
+        text: cleanedArticle
+      }
+      )
+};
+    try {
+      const response = await fetch(url, options);
+      const result = await response.text();
+      console.log(result);
+      setSummaryResult(result); // Save the summary result in the state
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const generateKeywords = async () => {
     const url = "https://microsoft-text-analytics1.p.rapidapi.com/keyPhrases";
     const options = {
@@ -117,7 +145,7 @@ function MainPage() {
           {
             countryHint: 'US',
             id: '1',
-            text: cleanedArticle
+            text: summaryResult
           },
         ],
       }),
@@ -127,6 +155,7 @@ function MainPage() {
       const response = await fetch(url, options);
       const result = await response.text();
       console.log(result);
+      setLanguageDetectionResult(result);
     } catch (error) {
       console.error(error);
     }
@@ -190,6 +219,12 @@ function MainPage() {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      <Button onClick={summarizeText}>Summarize</Button>
+        <h3>Summary:</h3>
+      <div className="summarize">
+      <p>{summaryResult}</p>
+      </div>
 
       <Button onClick={generateKeywords}>Generate Keywords</Button>
         <h3>Generated Keywords:</h3>
