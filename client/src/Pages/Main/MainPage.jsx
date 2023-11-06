@@ -92,14 +92,18 @@ function MainPage() {
       }
       )
 };
-    try {
-      const response = await fetch(url, options);
-      const result = await response.text();
-      console.log(result);
-      setSummaryResult(result); // Save the summary result in the state
-    } catch (error) {
-      console.error(error);
+  try {
+    const response = await fetch(url, options);
+    const result = await response.json(); // Parse response as JSON
+
+    if (result.ok) {
+      setSummaryResult(result.summary); // Set the summary in state
+    } else {
+      console.error("Error in summarization:", result.msg);
     }
+  } catch (error) {
+    console.error(error);
+  }
   };
 
   const generateKeywords = async () => {
@@ -116,7 +120,7 @@ function MainPage() {
           {
             id: '1',
             language: 'en',
-            text: cleanedArticle
+            text: summaryResult
           }
         ]
       })
@@ -124,11 +128,25 @@ function MainPage() {
 
     try {
       const response = await fetch(url, options);
-      const result = await response.text();
-      console.log(result);
+      const result = await response.json(); // Parse response as JSON
+    
+      if (result.documents && result.documents.length > 0) {
+        const keyPhrases = result.documents[0].keyPhrases;
+    
+        if (keyPhrases && keyPhrases.length > 0) {
+          // Add double quotes to each keyword
+          const formattedKeywords = keyPhrases.map(keyword => `"${keyword}"`).join(" ");
+          setGeneratedKeywords(formattedKeywords); // Set formatted keywords in state
+        } else {
+          console.error("No key phrases found in the response");
+        }
+      } else {
+        console.error("Invalid response format");
+      }
     } catch (error) {
       console.error(error);
     }
+    
   };
 
   const detectLanguage = async () => {
@@ -153,9 +171,21 @@ function MainPage() {
 
     try {
       const response = await fetch(url, options);
-      const result = await response.text();
-      console.log(result);
-      setLanguageDetectionResult(result);
+      const result = await response.json();
+  
+      if (result.documents && result.documents.length > 0) {
+        const detectedLanguage = result.documents[0].detectedLanguage;
+  
+        if (detectedLanguage) {
+          const languageName = detectedLanguage.name;
+          console.log(languageName);
+          setLanguageDetectionResult(languageName);
+        } else {
+          console.error("No detected language found in the response");
+        }
+      } else {
+        console.error("Invalid response format");
+      }
     } catch (error) {
       console.error(error);
     }
@@ -229,11 +259,7 @@ function MainPage() {
       <Button onClick={generateKeywords}>Generate Keywords</Button>
         <h3>Generated Keywords:</h3>
       <div className="generated-keywords">
-        <ul>
-          {generatedKeywords.map((keyword, index) => (
-            <li key={index}>{keyword}</li>
-          ))}
-        </ul>
+        <p>{generatedKeywords}</p>
       </div>
       
       <Button onClick={detectLanguage}>Detect Language</Button>
