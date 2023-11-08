@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Spinner, Modal, Button } from "react-bootstrap";
 import "./MainPage.css";
+import SentimentBar from "../../Components/SentimentBar";
 
 function MainPage() {
   const [newsSites, setNewsSites] = useState([]);
@@ -14,6 +15,7 @@ function MainPage() {
   const [languageDetectionResult, setLanguageDetectionResult] = useState(null);
   const [summaryResult, setSummaryResult] = useState("");
   const [sentimentAnalysisResult, setSentimentAnalysisResult] = useState("");
+  const [aggregateSentiment, setAggregateSentiment] = useState(null);
 
   useEffect(() => {
     fetch("http://localhost:5092/api/NewsSite/getAllNewsSites")
@@ -215,7 +217,9 @@ function MainPage() {
 
       if (result.sentiment) {
         console.log(result.sentiment);
+        console.log(result);
         setSentimentAnalysisResult(result.sentiment);
+        setAggregateSentiment(result.aggregate_sentiment);
       } else {
         console.error("Sentiment field not found in the response");
       }
@@ -258,7 +262,7 @@ function MainPage() {
       <div>
         {loading && (
           <div className="loading-spinner-container">
-            <div class="loader"></div>
+            <div className="loader"></div>
           </div>
         )}
 
@@ -307,7 +311,10 @@ function MainPage() {
       <h2>Detected Sentiment:</h2>
       {sentimentAnalysisResult && (
         <div>
-          <p>{sentimentAnalysisResult}</p>
+          <SentimentBar
+            sentimentAnalysisResult={sentimentAnalysisResult}
+            aggregateSentiment={aggregateSentiment}
+          />
         </div>
       )}
     </div>
