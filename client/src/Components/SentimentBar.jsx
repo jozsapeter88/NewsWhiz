@@ -8,7 +8,7 @@ const SentimentBar = ({ sentimentAnalysisResult, aggregateSentiment }) => {
   const neutralWidth = (neu * 100).toFixed(2) + "%";
   return (
     <div className="progressbar">
-      <h1>{sentimentAnalysisResult}</h1>
+      <h2>{sentimentAnalysisResult}</h2>
       <div className="progress rounded-pill">
         <div
           role="progressbar"

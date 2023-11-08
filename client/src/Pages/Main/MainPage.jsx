@@ -171,6 +171,7 @@ function MainPage() {
           },
         ],
       }),
+      
     };
 
     try {
@@ -267,8 +268,8 @@ function MainPage() {
         )}
 
         <div className="result-container">
-          <h2>Title: {title}</h2>
-          <p className="article-text">Article: {cleanedArticle}</p>
+          <h2>{title}</h2>
+          <p className="article-text">{cleanedArticle}</p>
         </div>
       </div>
 
