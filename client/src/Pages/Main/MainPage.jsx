@@ -37,11 +37,17 @@ function MainPage() {
   };
 
   const extractSiteNameFromUrl = (url) => {
+    // Check if the URL starts with 'http://' or 'https://'
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      // If not, prepend 'https://' to the URL
+      url = 'https://' + url;
+    }
+  
     // Example extraction logic: Assuming the site name is the next segment after "www"
     const urlObject = new URL(url);
     const pathSegments = urlObject.hostname.split(".");
     const wwwIndex = pathSegments.indexOf("www");
-
+  
     if (wwwIndex !== -1 && wwwIndex < pathSegments.length - 1) {
       return pathSegments[wwwIndex + 1];
     } else {
@@ -49,7 +55,7 @@ function MainPage() {
       return "default";
     }
   };
-
+  
   const handleScrapeClick = async () => {
     if (selectedSite && url) {
       setLoading(true);
