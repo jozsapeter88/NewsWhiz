@@ -99,3 +99,37 @@
     }
   }
   
+  /* Add these styles to your MainPage.css file */
+
+.accordion-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+  }
+  
+  .accordion-section {
+    margin-bottom: 10px;
+  }
+  
+  .accordion-section button {
+    background-color: #3498db;
+    color: #fff;
+    padding: 10px;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    width: 100%;
+  }
+  
+  .accordion-content {
+    padding: 10px;
+    display: none;
+  }
+  
+  .accordion-content.active {
+    display: block;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    padding: 10px;
+  }
+  

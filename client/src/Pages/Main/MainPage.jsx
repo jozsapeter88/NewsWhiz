@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Modal, Button } from "react-bootstrap";
+import { Accordion, Card, Modal, Button } from "react-bootstrap";
 import "./MainPage.css";
 import SentimentBar from "../../Components/SentimentBar";
 
@@ -17,6 +17,7 @@ function MainPage() {
   const [sentimentAnalysisResult, setSentimentAnalysisResult] = useState("");
   const [aggregateSentiment, setAggregateSentiment] = useState(null);
   const [scrapeButtonDisabled, setScrapeButtonDisabled] = useState(true);
+  const [activeAccordion, setActiveAccordion] = useState(null);
 
   useEffect(() => {
     fetch("http://localhost:5092/api/NewsSite/getAllNewsSites")
@@ -37,25 +38,23 @@ function MainPage() {
   };
 
   const extractSiteNameFromUrl = (url) => {
-    // Check if the URL starts with 'http://' or 'https://'
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-      // If not, prepend 'https://' to the URL
-      url = 'https://' + url;
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+      url = "https://" + url;
+      setUrl(url);
     }
-  
-    // Example extraction logic: Assuming the site name is the next segment after "www"
     const urlObject = new URL(url);
     const pathSegments = urlObject.hostname.split(".");
     const wwwIndex = pathSegments.indexOf("www");
-  
+
     if (wwwIndex !== -1 && wwwIndex < pathSegments.length - 1) {
       return pathSegments[wwwIndex + 1];
     } else {
-      // Return a default or handle the case where "www" or the next segment is not found
+      url = "www." + urlObject.hostname;
+      setUrl(url);
       return "default";
     }
   };
-  
+
   const handleScrapeClick = async () => {
     if (selectedSite && url) {
       setLoading(true);
@@ -103,17 +102,28 @@ function MainPage() {
 
   const handleDetectClick = async () => {
     const siteName = extractSiteNameFromUrl(url);
+    let wwwAlertShown = false;
 
     try {
+      if (siteName === "default") {
+        alert("Please add 'www.' to the URL for better detection.");
+        wwwAlertShown = true;
+      }
+
       const response = await fetch(
         `http://localhost:5092/api/NewsSite/getNewsSiteByName?name=${siteName}`
       );
+
       if (response.ok) {
         const data = await response.json();
-        setSelectedSite(data);
-        setScrapeButtonDisabled(false);
+        if (data) {
+          setSelectedSite(data);
+          setScrapeButtonDisabled(false);
+        }
       } else {
-        console.error("Error fetching NewsSite data:", response.statusText);
+        if (!wwwAlertShown) {
+          alert("News Site not found. Maybe it is not in our database yet.");
+        }
       }
     } catch (error) {
       console.error("Error fetching NewsSite data:", error);
@@ -270,6 +280,10 @@ function MainPage() {
     }
   };
 
+  const toggleAccordion = (index) => {
+    setActiveAccordion(activeAccordion === index ? null : index);
+  };
+
   return (
     <div className="main-container">
       <div>
@@ -320,36 +334,100 @@ function MainPage() {
         </Modal.Footer>
       </Modal>
 
-      <Button onClick={summarizeText}>Summarize</Button>
-      <h3>Summary:</h3>
-      <div className="summarize">
-        <p>{summaryResult}</p>
+      {/* Summarize Accordion */}
+      <div className="accordion-section">
+        <button
+          onClick={() => {
+            toggleAccordion(0);
+            summarizeText();
+          }}
+        >
+          Summarize
+        </button>
+        <div
+          className={`accordion-content ${
+            activeAccordion === 0 ? "active" : ""
+          }`}
+        >
+          <h3>Summary:</h3>
+          <div className="summarize">
+            <p>{summaryResult}</p>
+          </div>
+        </div>
       </div>
 
-      <Button onClick={generateKeywords}>Generate Keywords</Button>
-      <h3>Generated Keywords:</h3>
-      <div className="generated-keywords">
-        <p>{generatedKeywords}</p>
+      {/* Generate Keywords Accordion */}
+      <div className="accordion-section">
+        <button
+          onClick={() => {
+            toggleAccordion(1);
+            generateKeywords();
+          }}
+        >
+          Generate Keywords
+        </button>
+        <div
+          className={`accordion-content ${
+            activeAccordion === 1 ? "active" : ""
+          }`}
+        >
+          <h3>Generated Keywords:</h3>
+          <div className="generated-keywords">
+            <p>{generatedKeywords}</p>
+          </div>
+        </div>
       </div>
 
-      <Button onClick={detectLanguage}>Detect Language</Button>
-      <h2>Detected Language:</h2>
-      {languageDetectionResult && (
-        <div>
-          <p>{languageDetectionResult}</p>
+      {/* Detect Language Accordion */}
+      <div className="accordion-section">
+        <button
+          onClick={() => {
+            toggleAccordion(2);
+            detectLanguage();
+          }}
+        >
+          Detect Language
+        </button>
+        <div
+          className={`accordion-content ${
+            activeAccordion === 2 ? "active" : ""
+          }`}
+        >
+          <h3>Detected Language:</h3>
+          {languageDetectionResult && (
+            <div>
+              <p>{languageDetectionResult}</p>
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
-      <Button onClick={analyzeSentiment}>Analyse Sentiment</Button>
-      <h2>Detected Sentiment:</h2>
-      {sentimentAnalysisResult && (
-        <div>
-          <SentimentBar
-            sentimentAnalysisResult={sentimentAnalysisResult}
-            aggregateSentiment={aggregateSentiment}
-          />
+      {/* Analyse Sentiment Accordion */}
+      <div className="accordion-section">
+        <button
+          onClick={() => {
+            toggleAccordion(3);
+            analyzeSentiment();
+          }}
+        >
+          Analyse Sentiment
+        </button>
+        <div
+          className={`accordion-content ${
+            activeAccordion === 3 ? "active" : ""
+          }`}
+        >
+          <h3>Detected Sentiment:</h3>
+          {sentimentAnalysisResult && (
+            <div>
+              <SentimentBar
+                sentimentAnalysisResult={sentimentAnalysisResult}
+                aggregateSentiment={aggregateSentiment}
+              />
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
