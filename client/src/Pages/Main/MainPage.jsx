@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Spinner, Modal, Button } from "react-bootstrap";
+import { Modal, Button } from "react-bootstrap";
 import "./MainPage.css";
+import SentimentBar from "../../Components/SentimentBar";
 
 function MainPage() {
   const [newsSites, setNewsSites] = useState([]);
@@ -14,6 +15,8 @@ function MainPage() {
   const [languageDetectionResult, setLanguageDetectionResult] = useState(null);
   const [summaryResult, setSummaryResult] = useState("");
   const [sentimentAnalysisResult, setSentimentAnalysisResult] = useState("");
+  const [aggregateSentiment, setAggregateSentiment] = useState(null);
+  const [scrapeButtonDisabled, setScrapeButtonDisabled] = useState(true);
 
   useEffect(() => {
     fetch("http://localhost:5092/api/NewsSite/getAllNewsSites")
@@ -25,54 +28,89 @@ function MainPage() {
       .catch((error) => console.error("Error fetching news sites:", error));
   }, []);
 
-  const handleSiteChange = (e) => {
-    const selectedWebsite = e.target.value;
-    setSelectedSite(selectedWebsite);
-  };
-
   const handleCloseErrorModal = () => {
     setShowErrorModal(false);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    const requestData = {
-      selectedSite,
-      url,
-    };
+  const handleUrlChange = (e) => {
+    setUrl(e.target.value);
+  };
+
+  const extractSiteNameFromUrl = (url) => {
+    // Example extraction logic: Assuming the site name is the next segment after "www"
+    const urlObject = new URL(url);
+    const pathSegments = urlObject.hostname.split(".");
+    const wwwIndex = pathSegments.indexOf("www");
+
+    if (wwwIndex !== -1 && wwwIndex < pathSegments.length - 1) {
+      return pathSegments[wwwIndex + 1];
+    } else {
+      // Return a default or handle the case where "www" or the next segment is not found
+      return "default";
+    }
+  };
+
+  const handleScrapeClick = async () => {
+    if (selectedSite && url) {
+      setLoading(true);
+      const requestData = {
+        selectedSite: selectedSite.name,
+        url: url,
+      };
+
+      try {
+        const response = await fetch(
+          "http://localhost:5092/api/NewsSite/scrape",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestData),
+          }
+        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setTitle(data.title);
+          setArticle(data.article);
+          await summarizeText();
+          setSummaryResult(summaryResult);
+        } else {
+          console.log(requestData);
+          console.error("Error scraping website");
+          setTitle("");
+          setArticle("");
+          setShowErrorModal(true);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setTitle("Error");
+        setArticle("Error");
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      console.error("Selected NewsSite or URL is missing.");
+    }
+  };
+
+  const handleDetectClick = async () => {
+    const siteName = extractSiteNameFromUrl(url);
 
     try {
       const response = await fetch(
-        "http://localhost:5092/api/NewsSite/scrape",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(requestData),
-        }
+        `http://localhost:5092/api/NewsSite/getNewsSiteByName?name=${siteName}`
       );
-
       if (response.ok) {
         const data = await response.json();
-        setTitle(data.title);
-        setArticle(data.article);
-        await summarizeText();
-        setSummaryResult(summaryResult);
+        setSelectedSite(data);
+        setScrapeButtonDisabled(false);
       } else {
-        console.log(requestData);
-        console.error("Error scraping website");
-        setTitle("");
-        setArticle("");
-        setShowErrorModal(true);
+        console.error("Error fetching NewsSite data:", response.statusText);
       }
     } catch (error) {
-      console.error("Error fetching data:", error);
-      setTitle("Error");
-      setArticle("Error");
-    } finally {
-      setLoading(false);
+      console.error("Error fetching NewsSite data:", error);
     }
   };
 
@@ -215,7 +253,9 @@ function MainPage() {
 
       if (result.sentiment) {
         console.log(result.sentiment);
+        console.log(result);
         setSentimentAnalysisResult(result.sentiment);
+        setAggregateSentiment(result.aggregate_sentiment);
       } else {
         console.error("Sentiment field not found in the response");
       }
@@ -226,45 +266,36 @@ function MainPage() {
 
   return (
     <div className="main-container">
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label>Select a website:</label>
-          <select
-            className="select-site"
-            value={selectedSite}
-            onChange={handleSiteChange}
-          >
-            <option value="">Select an option</option>
-            {newsSites.map((site) => (
-              <option key={site.newsSiteId} value={site.name}>
-                {site.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="form-group">
-          <label>Enter the URL to scrape:</label>
-          <input
-            className="url-input"
-            type="text"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-          />
-        </div>
-        <Button className="scrape-button" type="submit">
-          Scrape
+      <div>
+        <label>Paste URL:</label>
+        <input
+          className="url-input"
+          type="text"
+          value={url}
+          onChange={handleUrlChange}
+        />
+        <Button onClick={handleDetectClick}>Detect</Button>
+        {selectedSite && (
+          <div>
+            <h3>Detected News Site:</h3>
+            <p>{selectedSite.name}</p>
+          </div>
+        )}
+        <Button onClick={handleScrapeClick} disabled={scrapeButtonDisabled}>
+          {" "}
+          Scrape!
         </Button>
-      </form>
+      </div>
       <div>
         {loading && (
           <div className="loading-spinner-container">
-            <div class="loader"></div>
+            <div className="loader"></div>
           </div>
         )}
 
         <div className="result-container">
-          <h2>Title: {title}</h2>
-          <p className="article-text">Article: {cleanedArticle}</p>
+          <h2>{title}</h2>
+          <p className="article-text">{cleanedArticle}</p>
         </div>
       </div>
 
@@ -307,7 +338,10 @@ function MainPage() {
       <h2>Detected Sentiment:</h2>
       {sentimentAnalysisResult && (
         <div>
-          <p>{sentimentAnalysisResult}</p>
+          <SentimentBar
+            sentimentAnalysisResult={sentimentAnalysisResult}
+            aggregateSentiment={aggregateSentiment}
+          />
         </div>
       )}
     </div>

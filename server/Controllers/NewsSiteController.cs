@@ -50,7 +50,20 @@ public class NewsSiteController : ControllerBase
         }
     }
 
+    [HttpGet("getNewsSiteByName")]
+    public IActionResult GetNewsSiteByName([FromQuery] string name)
+    {
+        var newsSite = _newsSiteService.GetNewsSiteByName(name);
 
+        if (newsSite != null)
+        {
+            return Ok(newsSite);
+        }
+        else
+        {
+            return NotFound($"NewsSite with name '{name}' not found.");
+        }
+    }
 
 
 
