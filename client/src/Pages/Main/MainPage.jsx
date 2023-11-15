@@ -286,39 +286,46 @@ function MainPage() {
 
   return (
     <div className="main-container">
-      <div>
-        <label>Paste URL:</label>
+      <div className="control">
         <input
           className="url-input"
           type="text"
+          placeholder="Paste URL"
           value={url}
           onChange={handleUrlChange}
         />
-        <Button onClick={handleDetectClick}>Detect</Button>
+        <div className="button-container">
+          <Button onClick={handleDetectClick}>Detect</Button>
+          <Button
+            onClick={handleScrapeClick}
+            disabled={scrapeButtonDisabled}
+            className="button-scrape"
+          >
+            Scrape!
+          </Button>
+        </div>
+      </div>
+      <Card className="detected">
         {selectedSite && (
           <div>
-            <h3>Detected News Site:</h3>
-            <p>{selectedSite.name}</p>
+            <h3>Detected: {selectedSite.name}</h3>
           </div>
         )}
-        <Button onClick={handleScrapeClick} disabled={scrapeButtonDisabled}>
-          {" "}
-          Scrape!
-        </Button>
-      </div>
+      </Card>
+
       <div>
         {loading && (
           <div className="loading-spinner-container">
             <div className="loader"></div>
           </div>
         )}
-
-        <div className="result-container">
-          <h2>{title}</h2>
-          <p className="article-text">{cleanedArticle}</p>
-        </div>
+        {title && cleanedArticle && (
+          <Card className="result-container">
+            <h2>{title}</h2>
+            <p className="article-text">{cleanedArticle}</p>
+          </Card>
+        )}
       </div>
-
       <Modal show={showErrorModal} onHide={handleCloseErrorModal}>
         <Modal.Header closeButton>
           <Modal.Title>An error occurred</Modal.Title>

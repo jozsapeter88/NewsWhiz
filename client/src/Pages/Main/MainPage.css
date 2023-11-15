@@ -1,135 +1,171 @@
 .main-container {
-    padding: 20px;
-    text-align: center;
+  padding: 20px;
+  text-align: center;
+}
+
+.control {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;
+  margin: 0 auto;
+  width: 80%;
 }
 
 .form-group {
-    margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 
 .select-site {
-    width: auto;
+  width: auto;
 }
 
 .url-input {
-    width: 100%;
+  width: 100%;
 }
 
 .scrape-button {
-    background-color: #007bff;
-    color: white;
+  background-color: #007bff;
+  color: white;
 }
 
 .result-container {
-    margin-top: 20px;
-    display: inline-block;
-    width: 80%;
-    border: 1px solid #ccc;
-    padding: 20px;
+  margin-top: 20px;
+  display: inline-block;
+  align-items: center;
+  width: 80%;
+  border: 1px solid #ccc;
+  padding: 20px;
+  margin: 0 auto;
+  float: none;
+  margin-bottom: 10px;
+  margin-top: 10px;
 }
 
 .loading-spinner {
-    margin: 0 auto;
-    display: block;
+  margin: 0 auto;
+  display: block;
 }
 
 .article-text {
-    white-space: pre-wrap;
+  white-space: pre-wrap;
 }
 
+.button-scrape {
+  margin-left: 10px;
+}
+
+.button-container {
+  display: flex;
+  align-items: center;
+  margin-left: 10px;
+}
+
+.detected {
+  margin-top: 10px;
+  text-align: left;
+  width: fit-content;
+  margin-left: 185px;
+}
+
+
 .loading-spinner-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.836);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 999;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.836);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
 }
 
 .loader {
-    animation: spin 1s infinite linear;
+  animation: spin 1s infinite linear;
+  border: solid 2vmin transparent;
+  border-radius: 50%;
+  border-right-color: #09f;
+  border-top-color: #09f;
+  box-sizing: border-box;
+  height: 20vmin;
+  left: calc(50% - 10vmin);
+  position: fixed;
+  top: calc(50% - 10vmin);
+  width: 20vmin;
+  z-index: 1;
+
+  &:before {
+    animation: spin 2s infinite linear;
     border: solid 2vmin transparent;
     border-radius: 50%;
-    border-right-color: #09f;
-    border-top-color: #09f;
+    border-right-color: #3cf;
+    border-top-color: #3cf;
     box-sizing: border-box;
-    height: 20vmin;
-    left: calc(50% - 10vmin);
-    position: fixed;
-    top: calc(50% - 10vmin);
-    width: 20vmin;
-    z-index: 1;
-    &:before {
-      animation: spin 2s infinite linear;
-      border: solid 2vmin transparent;
-      border-radius: 50%;
-      border-right-color: #3cf;
-      border-top-color: #3cf;
-      box-sizing: border-box;
-      content: "";
-      height: 16vmin;
-      left: 0;
-      position: absolute;
-      top: 0;
-      width: 16vmin;
-    }
-    &:after {
-      animation: spin 3s infinite linear;
-      border: solid 2vmin transparent;
-      border-radius: 50%;
-      border-right-color: #6ff;
-      border-top-color: #6ff;
-      box-sizing: border-box;
-      content: "";
-      height: 12vmin;
-      left: 2vmin;
-      position: absolute;
-      top: 2vmin;
-      width: 12vmin;
-    }
+    content: "";
+    height: 16vmin;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 16vmin;
   }
-  
-  @keyframes spin {
-    100% {
-      transform: rotate(360deg);
-    }
+
+  &:after {
+    animation: spin 3s infinite linear;
+    border: solid 2vmin transparent;
+    border-radius: 50%;
+    border-right-color: #6ff;
+    border-top-color: #6ff;
+    box-sizing: border-box;
+    content: "";
+    height: 12vmin;
+    left: 2vmin;
+    position: absolute;
+    top: 2vmin;
+    width: 12vmin;
   }
-  
-  /* Add these styles to your MainPage.css file */
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}
 
 .accordion-container {
-    display: flex;
-    flex-direction: column;
-    margin-top: 20px;
-  }
-  
-  .accordion-section {
-    margin-bottom: 10px;
-  }
-  
-  .accordion-section button {
-    background-color: #3498db;
-    color: #fff;
-    padding: 10px;
-    border: none;
-    text-align: left;
-    cursor: pointer;
-    width: 100%;
-  }
-  
-  .accordion-content {
-    padding: 10px;
-    display: none;
-  }
-  
-  .accordion-content.active {
-    display: block;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    padding: 10px;
-  }
-  
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+}
+
+.accordion-section {
+  margin-bottom: 10px;
+  width: 80%;
+  text-align: center;
+  margin: 0 auto;
+  float: none;
+  margin-bottom: 10px;
+}
+
+.accordion-section button {
+  background-color: #3498db;
+  color: #fff;
+  padding: 10px;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+}
+
+.accordion-content {
+  padding: 10px;
+  display: none;
+}
+
+.accordion-content.active {
+  display: block;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 10px;
+}
