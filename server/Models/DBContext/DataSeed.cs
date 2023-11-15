@@ -11,13 +11,13 @@ public class DataSeed
             {
                 new NewsSite
                 {
-                    Name = "BBC",
+                    Name = "bbc",
                     TitleXPath = "//h1[@class='article-headline__text b-reith-sans-font b-font-weight-300']",
                     ArticleXPath = "//div[@class='article__body-content']"
                 },
                 new NewsSite
                 {
-                    Name = "Index",
+                    Name = "index",
                     TitleXPath = "//div[@class='content-title']",
                     ArticleXPath = "//div[@class='cikk-torzs']"
                 }
