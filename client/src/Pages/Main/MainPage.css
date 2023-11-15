@@ -42,6 +42,11 @@
   position: relative;
 }
 
+.cards-container {
+  display: flex;
+  justify-content: space-between;
+}
+
 .result-container button {
   position: absolute;
   font-size: 20px;
@@ -73,13 +78,26 @@
   margin-left: 10px;
 }
 
-.detected {
+.detected-site {
   margin-top: 10px;
   text-align: left;
   width: fit-content;
   margin-left: 185px;
 }
 
+.detected-lang {
+  margin-top: auto;
+  width: fit-content;
+  margin-right: 185px;
+}
+
+.sentiment-result {
+  width: 80%;
+  align-items: center;
+  text-align: left;
+  margin: 0 auto;
+  margin-bottom: 20px;
+}
 
 .loading-spinner-container {
   position: fixed;

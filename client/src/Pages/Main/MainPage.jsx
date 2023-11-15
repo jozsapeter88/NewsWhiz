@@ -20,12 +20,6 @@ function MainPage() {
   const [activeAccordion, setActiveAccordion] = useState(null);
   const [showFullContent, setShowFullContent] = useState(false);
 
-  const [loadingSummary, setLoadingSummary] = useState(false);
-  const [loadingKeywords, setLoadingKeywords] = useState(false);
-  const [loadingDetectLanguage, setLoadingDetectLanguage] = useState(false);
-  const [loadingSentimentAnalysis, setLoadingSentimentAnalysis] =
-    useState(false);
-
   useEffect(() => {
     fetch("http://localhost:5092/api/NewsSite/getAllNewsSites")
       .then((response) => response.json())
@@ -87,7 +81,12 @@ function MainPage() {
           setTitle(data.title);
           setArticle(data.article);
           await summarizeText();
-          setSummaryResult(summaryResult);
+
+          // Detect language
+          await detectLanguage();
+
+          // Analyze sentiment
+          await analyzeSentiment();
         } else {
           console.log(requestData);
           console.error("Error scraping website");
@@ -112,7 +111,6 @@ function MainPage() {
     let wwwAlertShown = false;
 
     try {
-      setLoadingDetectLanguage(true);
       if (siteName === "default") {
         alert("Please add 'www.' to the URL for better detection.");
         wwwAlertShown = true;
@@ -135,8 +133,6 @@ function MainPage() {
       }
     } catch (error) {
       console.error("Error fetching NewsSite data:", error);
-    } finally {
-      setLoadingDetectLanguage(false);
     }
   };
 
@@ -159,7 +155,6 @@ function MainPage() {
       }),
     };
     try {
-      setLoadingSummary(true);
       const response = await fetch(url, options);
       const result = await response.json();
 
@@ -170,9 +165,6 @@ function MainPage() {
       }
     } catch (error) {
       console.error(error);
-    } finally {
-      setLoadingSummary(false);
-      setLoading(false);
     }
   };
 
@@ -197,7 +189,6 @@ function MainPage() {
     };
 
     try {
-      setLoadingKeywords(true);
       const response = await fetch(url, options);
       const result = await response.json();
 
@@ -217,9 +208,6 @@ function MainPage() {
       }
     } catch (error) {
       console.error(error);
-    } finally {
-      setLoadingKeywords(false);
-      setLoading(false);
     }
   };
 
@@ -244,7 +232,6 @@ function MainPage() {
     };
 
     try {
-      setLoadingDetectLanguage(true);
       const response = await fetch(url, options);
       const result = await response.json();
 
@@ -263,9 +250,6 @@ function MainPage() {
       }
     } catch (error) {
       console.error(error);
-    } finally {
-      setLoadingDetectLanguage(false); // Reset loading state after completion
-      setLoading(false);
     }
   };
 
@@ -286,7 +270,6 @@ function MainPage() {
     };
 
     try {
-      setLoadingSentimentAnalysis(true);
       const response = await fetch(url, options);
       const result = await response.json();
 
@@ -300,9 +283,6 @@ function MainPage() {
       }
     } catch (error) {
       console.error(error);
-    } finally {
-      setLoadingSentimentAnalysis(false);
-      setLoading(false);
     }
   };
 
@@ -331,14 +311,23 @@ function MainPage() {
           </Button>
         </div>
       </div>
-      <Card className="detected">
-        {selectedSite && (
-          <div>
-            <h3>Detected: {selectedSite.name}</h3>
-          </div>
-        )}
-      </Card>
+      <div className="cards-container">
+        <Card className="detected-site">
+          {selectedSite && (
+            <div>
+              <h3>{selectedSite.name}</h3>
+            </div>
+          )}
+        </Card>
 
+        <Card className="detected-lang">
+          {languageDetectionResult && (
+            <div>
+              <h3>{languageDetectionResult}</h3>
+            </div>
+          )}
+        </Card>
+      </div>
       <div>
         {loading && (
           <div className="loading-spinner-container">
@@ -360,6 +349,22 @@ function MainPage() {
             )}
           </Card>
         )}
+        <div className="sentiment-result">
+  {sentimentAnalysisResult && (
+    <>
+      <p>
+        Sentiment analysis result: mostly <b>{sentimentAnalysisResult}</b>
+      </p>
+      <div>
+        <SentimentBar
+          sentimentAnalysisResult={sentimentAnalysisResult}
+          aggregateSentiment={aggregateSentiment}
+        />
+      </div>
+    </>
+  )}
+</div>
+
       </div>
       <Modal show={showErrorModal} onHide={handleCloseErrorModal}>
         <Modal.Header closeButton>
@@ -386,7 +391,6 @@ function MainPage() {
         >
           Summarize
         </button>
-        {loadingSummary && <div className="loader"></div>}
         <div
           className={`accordion-content ${
             activeAccordion === 0 ? "active" : ""
@@ -409,7 +413,6 @@ function MainPage() {
         >
           Generate Keywords
         </button>
-        {loadingKeywords && <div className="loader"></div>}
         <div
           className={`accordion-content ${
             activeAccordion === 1 ? "active" : ""
@@ -419,59 +422,6 @@ function MainPage() {
           <div className="generated-keywords">
             <p>{generatedKeywords}</p>
           </div>
-        </div>
-      </div>
-
-      {/* Detect Language Accordion */}
-      <div className="accordion-section">
-        <button
-          onClick={() => {
-            toggleAccordion(2);
-            detectLanguage();
-          }}
-        >
-          Detect Language
-        </button>
-        {loadingDetectLanguage && <div className="loader"></div>}
-        <div
-          className={`accordion-content ${
-            activeAccordion === 2 ? "active" : ""
-          }`}
-        >
-          <h3>Detected Language:</h3>
-          {languageDetectionResult && (
-            <div>
-              <p>{languageDetectionResult}</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Analyse Sentiment Accordion */}
-      <div className="accordion-section">
-        <button
-          onClick={() => {
-            toggleAccordion(3);
-            analyzeSentiment();
-          }}
-        >
-          Analyse Sentiment
-        </button>
-        {loadingSentimentAnalysis && <div className="loader"></div>}
-        <div
-          className={`accordion-content ${
-            activeAccordion === 3 ? "active" : ""
-          }`}
-        >
-          <h3>Detected Sentiment:</h3>
-          {sentimentAnalysisResult && (
-            <div>
-              <SentimentBar
-                sentimentAnalysisResult={sentimentAnalysisResult}
-                aggregateSentiment={aggregateSentiment}
-              />
-            </div>
-          )}
         </div>
       </div>
     </div>

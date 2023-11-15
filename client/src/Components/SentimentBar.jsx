@@ -6,9 +6,9 @@ const SentimentBar = ({ sentimentAnalysisResult, aggregateSentiment }) => {
   const positiveWidth = (pos * 100).toFixed(2) + "%";
   const negativeWidth = (neg * 100).toFixed(2) + "%";
   const neutralWidth = (neu * 100).toFixed(2) + "%";
+
   return (
     <div className="progressbar">
-      <h2>{sentimentAnalysisResult}</h2>
       <div className="progress rounded-pill">
         <div
           role="progressbar"
