@@ -18,6 +18,13 @@ function MainPage() {
   const [aggregateSentiment, setAggregateSentiment] = useState(null);
   const [scrapeButtonDisabled, setScrapeButtonDisabled] = useState(true);
   const [activeAccordion, setActiveAccordion] = useState(null);
+  const [showFullContent, setShowFullContent] = useState(false);
+
+  const [loadingSummary, setLoadingSummary] = useState(false);
+  const [loadingKeywords, setLoadingKeywords] = useState(false);
+  const [loadingDetectLanguage, setLoadingDetectLanguage] = useState(false);
+  const [loadingSentimentAnalysis, setLoadingSentimentAnalysis] =
+    useState(false);
 
   useEffect(() => {
     fetch("http://localhost:5092/api/NewsSite/getAllNewsSites")
@@ -105,6 +112,7 @@ function MainPage() {
     let wwwAlertShown = false;
 
     try {
+      setLoadingDetectLanguage(true);
       if (siteName === "default") {
         alert("Please add 'www.' to the URL for better detection.");
         wwwAlertShown = true;
@@ -127,6 +135,8 @@ function MainPage() {
       }
     } catch (error) {
       console.error("Error fetching NewsSite data:", error);
+    } finally {
+      setLoadingDetectLanguage(false);
     }
   };
 
@@ -149,6 +159,7 @@ function MainPage() {
       }),
     };
     try {
+      setLoadingSummary(true);
       const response = await fetch(url, options);
       const result = await response.json();
 
@@ -159,6 +170,9 @@ function MainPage() {
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoadingSummary(false);
+      setLoading(false);
     }
   };
 
@@ -183,6 +197,7 @@ function MainPage() {
     };
 
     try {
+      setLoadingKeywords(true);
       const response = await fetch(url, options);
       const result = await response.json();
 
@@ -202,6 +217,9 @@ function MainPage() {
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoadingKeywords(false);
+      setLoading(false);
     }
   };
 
@@ -226,6 +244,7 @@ function MainPage() {
     };
 
     try {
+      setLoadingDetectLanguage(true);
       const response = await fetch(url, options);
       const result = await response.json();
 
@@ -244,6 +263,9 @@ function MainPage() {
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoadingDetectLanguage(false); // Reset loading state after completion
+      setLoading(false);
     }
   };
 
@@ -264,6 +286,7 @@ function MainPage() {
     };
 
     try {
+      setLoadingSentimentAnalysis(true);
       const response = await fetch(url, options);
       const result = await response.json();
 
@@ -277,6 +300,9 @@ function MainPage() {
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoadingSentimentAnalysis(false);
+      setLoading(false);
     }
   };
 
@@ -322,7 +348,16 @@ function MainPage() {
         {title && cleanedArticle && (
           <Card className="result-container">
             <h2>{title}</h2>
-            <p className="article-text">{cleanedArticle}</p>
+            <p className="article-text">
+              {showFullContent
+                ? cleanedArticle
+                : `${cleanedArticle.slice(0, 1200)}...`}
+            </p>
+            {cleanedArticle.length > 1200 && (
+              <button onClick={() => setShowFullContent(!showFullContent)}>
+                {showFullContent ? "View less" : "View more..."}
+              </button>
+            )}
           </Card>
         )}
       </div>
@@ -351,6 +386,7 @@ function MainPage() {
         >
           Summarize
         </button>
+        {loadingSummary && <div className="loader"></div>}
         <div
           className={`accordion-content ${
             activeAccordion === 0 ? "active" : ""
@@ -373,6 +409,7 @@ function MainPage() {
         >
           Generate Keywords
         </button>
+        {loadingKeywords && <div className="loader"></div>}
         <div
           className={`accordion-content ${
             activeAccordion === 1 ? "active" : ""
@@ -395,6 +432,7 @@ function MainPage() {
         >
           Detect Language
         </button>
+        {loadingDetectLanguage && <div className="loader"></div>}
         <div
           className={`accordion-content ${
             activeAccordion === 2 ? "active" : ""
@@ -419,6 +457,7 @@ function MainPage() {
         >
           Analyse Sentiment
         </button>
+        {loadingSentimentAnalysis && <div className="loader"></div>}
         <div
           className={`accordion-content ${
             activeAccordion === 3 ? "active" : ""
