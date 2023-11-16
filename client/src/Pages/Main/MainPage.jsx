@@ -19,6 +19,20 @@ function MainPage() {
   const [scrapeButtonDisabled, setScrapeButtonDisabled] = useState(true);
   const [activeAccordion, setActiveAccordion] = useState(null);
   const [showFullContent, setShowFullContent] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+  };
+
+  useEffect(() => {
+    // You can apply different styles or themes based on the mode
+    if (isDarkMode) {
+      document.body.classList.add("dark-mode");
+    } else {
+      document.body.classList.remove("dark-mode");
+    }
+  }, [isDarkMode]);
 
   useEffect(() => {
     fetch("http://localhost:5092/api/NewsSite/getAllNewsSites")
@@ -55,11 +69,11 @@ function MainPage() {
       return "default";
     }
   };
-
+  
   const handleScrapeClick = async () => {
     if (selectedSite && url) {
       setLoading(true);
-      const requestData = {
+const requestData = {
         selectedSite: selectedSite.name,
         url: url,
       };
@@ -78,17 +92,27 @@ function MainPage() {
 
         if (response.ok) {
           const data = await response.json();
+
+          // Check if the content is empty or not suitable for summarization
+          if (!data || !data.title || !data.article) {
+            console.error("Empty or invalid content");
+            setTitle("");
+            setArticle("");
+            setShowErrorModal(true);
+            return;
+          }
+
           setTitle(data.title);
           setArticle(data.article);
-          await summarizeText();
+await summarizeText();
 
-          // Detect language
-          await detectLanguage();
+              // Detect language
+              await detectLanguage();
 
-          // Analyze sentiment
-          await analyzeSentiment();
-        } else {
-          console.log(requestData);
+              // Analyze sentiment
+              await analyzeSentiment();
+            } else {
+              console.log(requestData);
           console.error("Error scraping website");
           setTitle("");
           setArticle("");
@@ -139,6 +163,8 @@ function MainPage() {
   const cleanedArticle = article.replace(/\s+/g, " ").trim();
 
   const summarizeText = async () => {
+    console.log("Cleaned Article:", cleanedArticle);
+
     const url =
       "https://text-analysis12.p.rapidapi.com/summarize-text/api/v1.1";
     const options = {
@@ -154,9 +180,13 @@ function MainPage() {
         text: cleanedArticle,
       }),
     };
+
     try {
       const response = await fetch(url, options);
       const result = await response.json();
+
+      console.log("Summarization Request:", options);
+      console.log("Summarization Result:", result);
 
       if (result.ok) {
         setSummaryResult(result.summary);
@@ -291,7 +321,7 @@ function MainPage() {
   };
 
   return (
-    <div className="main-container">
+    <div className={`main-container ${isDarkMode ? "dark-mode" : ""}`}>
       <div className="control">
         <input
           className="url-input"
@@ -350,21 +380,21 @@ function MainPage() {
           </Card>
         )}
         <div className="sentiment-result">
-  {sentimentAnalysisResult && (
-    <>
-      <p>
-        Sentiment analysis result: mostly <b>{sentimentAnalysisResult}</b>
-      </p>
-      <div>
-        <SentimentBar
-          sentimentAnalysisResult={sentimentAnalysisResult}
-          aggregateSentiment={aggregateSentiment}
-        />
-      </div>
-    </>
-  )}
-</div>
-
+          {sentimentAnalysisResult && (
+            <>
+              <p>
+                Sentiment analysis result: mostly{" "}
+                <b>{sentimentAnalysisResult}</b>
+              </p>
+              <div>
+                <SentimentBar
+                  sentimentAnalysisResult={sentimentAnalysisResult}
+                  aggregateSentiment={aggregateSentiment}
+                />
+              </div>
+            </>
+          )}
+        </div>
       </div>
       <Modal show={showErrorModal} onHide={handleCloseErrorModal}>
         <Modal.Header closeButton>
@@ -424,6 +454,19 @@ function MainPage() {
           </div>
         </div>
       </div>
+
+      {/* Dark-Light Mode Switch */}
+      <div className="dark-light-mode-switch">
+        <label>
+          Dark Mode
+          <input
+            type="checkbox"
+            checked={isDarkMode}
+            onChange={toggleDarkMode}
+          />
+        </label>
+      </div>
+
     </div>
   );
 }
