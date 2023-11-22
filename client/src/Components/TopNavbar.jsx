@@ -25,7 +25,7 @@ function TopNavbar() {
       variant={isDarkMode ? "dark" : "light"}
     >
       <Container>
-        <Navbar.Brand href="#home">NewsWhiz</Navbar.Brand>
+        <Navbar.Brand href="#home"><img src="assets/images/nav.png" alt="logo" style={{ height: "100px", width: "200px" }} /></Navbar.Brand>
         <Navbar.Toggle />
         <Navbar.Collapse className="justify-content-end">
           <Navbar.Text>
