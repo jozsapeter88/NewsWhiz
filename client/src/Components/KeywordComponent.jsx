@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import "./KeywordComponent.css";
 
 const KeywordComponent = ({toggleAccordion, activeAccordion, summaryResult}) => {
 

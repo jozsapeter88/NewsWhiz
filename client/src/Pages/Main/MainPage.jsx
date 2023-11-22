@@ -3,7 +3,8 @@ import { Accordion, Card, Modal, Button } from "react-bootstrap";
 import "./MainPage.css";
 import SentimentBar from "../../Components/SentimentBar";
 import TopNavbar from "../../Components/TopNavbar";
-import KeywordComponent from "../../Components/KeywordGeneration";
+import KeywordComponent from "../../Components/KeywordComponent";
+import SummaryComponent from "../../Components/SummaryGeneration";
 
 function MainPage() {
   const [newsSites, setNewsSites] = useState([]);
@@ -199,49 +200,6 @@ function MainPage() {
     }
   };
 
-  const generateKeywords = async () => {
-    const url = "https://microsoft-text-analytics1.p.rapidapi.com/keyPhrases";
-    const options = {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "X-RapidAPI-Key": "21ab335ba4msh85f8c88bb6ae3f6p14ac31jsn78a47852eb0d",
-        "X-RapidAPI-Host": "microsoft-text-analytics1.p.rapidapi.com",
-      },
-      body: JSON.stringify({
-        documents: [
-          {
-            id: "1",
-            language: "en",
-            text: summaryResult,
-          },
-        ],
-      }),
-    };
-
-    try {
-      const response = await fetch(url, options);
-      const result = await response.json();
-
-      if (result.documents && result.documents.length > 0) {
-        const keyPhrases = result.documents[0].keyPhrases;
-
-        if (keyPhrases && keyPhrases.length > 0) {
-          const formattedKeywords = keyPhrases
-            .map((keyword) => `"${keyword}"`)
-            .join(" ");
-          setGeneratedKeywords(formattedKeywords);
-        } else {
-          console.error("No key phrases found in the response");
-        }
-      } else {
-        console.error("Invalid response format");
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   const detectLanguage = async () => {
     const url = "https://microsoft-text-analytics1.p.rapidapi.com/languages";
     const options = {
@@ -414,50 +372,8 @@ function MainPage() {
         </Modal.Footer>
       </Modal>
 
-      {/* Summarize Accordion */}
-      <div className="accordion-section">
-        <button
-          onClick={() => {
-            toggleAccordion(0);
-            summarizeText();
-          }}
-        >
-          Summarize
-        </button>
-        <div
-          className={`accordion-content ${
-            activeAccordion === 0 ? "active" : ""
-          }`}
-        >
-          <h3>Summary:</h3>
-          <div className="summarize">
-            <p>{summaryResult}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Generate Keywords Accordion */}
+      <SummaryComponent toggleAccordion={toggleAccordion} activeAccordion={activeAccordion} cleanedArticle={cleanedArticle} />
       <KeywordComponent toggleAccordion={toggleAccordion} summaryResult={summaryResult} activeAccordion={activeAccordion} />
-      {/* <div className="accordion-section">
-        <button
-          onClick={() => {
-            toggleAccordion(1);
-            generateKeywords();
-          }}
-        >
-          Generate Keywords
-        </button>
-        <div
-          className={`accordion-content ${
-            activeAccordion === 1 ? "active" : ""
-          }`}
-        >
-          <h3>Generated Keywords:</h3>
-          <div className="generated-keywords">
-            <p>{generatedKeywords}</p>
-          </div>
-        </div>
-      </div> */}
     </div>
     </>
   );
