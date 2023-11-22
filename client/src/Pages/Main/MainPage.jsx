@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Accordion, Card, Modal, Button } from "react-bootstrap";
 import "./MainPage.css";
 import SentimentBar from "../../Components/SentimentBar";
+import TopNavbar from "../../Components/TopNavbar";
+import KeywordComponent from "../../Components/KeywordGeneration";
 
 function MainPage() {
   const [newsSites, setNewsSites] = useState([]);
@@ -18,6 +20,20 @@ function MainPage() {
   const [aggregateSentiment, setAggregateSentiment] = useState(null);
   const [scrapeButtonDisabled, setScrapeButtonDisabled] = useState(true);
   const [activeAccordion, setActiveAccordion] = useState(null);
+  const [showFullContent, setShowFullContent] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+  };
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.body.classList.add("dark-mode");
+    } else {
+      document.body.classList.remove("dark-mode");
+    }
+  }, [isDarkMode]);
 
   useEffect(() => {
     fetch("http://localhost:5092/api/NewsSite/getAllNewsSites")
@@ -77,10 +93,25 @@ function MainPage() {
 
         if (response.ok) {
           const data = await response.json();
+
+          // Check if the content is empty or not suitable for summarization
+          if (!data || !data.title || !data.article) {
+            console.error("Empty or invalid content");
+            setTitle("");
+            setArticle("");
+            setShowErrorModal(true);
+            return;
+          }
+
           setTitle(data.title);
           setArticle(data.article);
           await summarizeText();
-          setSummaryResult(summaryResult);
+
+          // Detect language
+          await detectLanguage();
+
+          // Analyze sentiment
+          await analyzeSentiment();
         } else {
           console.log(requestData);
           console.error("Error scraping website");
@@ -133,6 +164,8 @@ function MainPage() {
   const cleanedArticle = article.replace(/\s+/g, " ").trim();
 
   const summarizeText = async () => {
+    console.log("Cleaned Article:", cleanedArticle);
+
     const url =
       "https://text-analysis12.p.rapidapi.com/summarize-text/api/v1.1";
     const options = {
@@ -148,9 +181,13 @@ function MainPage() {
         text: cleanedArticle,
       }),
     };
+
     try {
       const response = await fetch(url, options);
       const result = await response.json();
+
+      console.log("Summarization Request:", options);
+      console.log("Summarization Result:", result);
 
       if (result.ok) {
         setSummaryResult(result.summary);
@@ -285,26 +322,44 @@ function MainPage() {
   };
 
   return (
-    <div className="main-container">
-      <div>
-        <label>Paste URL:</label>
+    <>
+      <TopNavbar />
+    <div className={`main-container ${isDarkMode ? "dark-mode" : ""}`}>
+      <div className="control">
         <input
           className="url-input"
           type="text"
+          placeholder="Paste URL"
           value={url}
           onChange={handleUrlChange}
         />
-        <Button onClick={handleDetectClick}>Detect</Button>
-        {selectedSite && (
-          <div>
-            <h3>Detected News Site:</h3>
-            <p>{selectedSite.name}</p>
-          </div>
-        )}
-        <Button onClick={handleScrapeClick} disabled={scrapeButtonDisabled}>
-          {" "}
-          Scrape!
-        </Button>
+        <div className="button-container">
+          <Button onClick={handleDetectClick}>Detect</Button>
+          <Button
+            onClick={handleScrapeClick}
+            disabled={scrapeButtonDisabled}
+            className="button-scrape"
+          >
+            Scrape!
+          </Button>
+        </div>
+      </div>
+      <div className="cards-container">
+        <Card className="detected-site">
+          {selectedSite && (
+            <div>
+              <h3>{selectedSite.name}</h3>
+            </div>
+          )}
+        </Card>
+
+        <Card className="detected-lang">
+          {languageDetectionResult && (
+            <div>
+              <h3>{languageDetectionResult}</h3>
+            </div>
+          )}
+        </Card>
       </div>
       <div>
         {loading && (
@@ -312,13 +367,38 @@ function MainPage() {
             <div className="loader"></div>
           </div>
         )}
-
-        <div className="result-container">
-          <h2>{title}</h2>
-          <p className="article-text">{cleanedArticle}</p>
+        {title && cleanedArticle && (
+          <Card className="result-container">
+            <h2>{title}</h2>
+            <p className="article-text">
+              {showFullContent
+                ? cleanedArticle
+                : `${cleanedArticle.slice(0, 1200)}...`}
+            </p>
+            {cleanedArticle.length > 1200 && (
+              <button onClick={() => setShowFullContent(!showFullContent)}>
+                {showFullContent ? "View less" : "View more..."}
+              </button>
+            )}
+          </Card>
+        )}
+        <div className="sentiment-result">
+          {sentimentAnalysisResult && (
+            <>
+              <p>
+                Sentiment analysis result: mostly{" "}
+                <b>{sentimentAnalysisResult}</b>
+              </p>
+              <div>
+                <SentimentBar
+                  sentimentAnalysisResult={sentimentAnalysisResult}
+                  aggregateSentiment={aggregateSentiment}
+                />
+              </div>
+            </>
+          )}
         </div>
       </div>
-
       <Modal show={showErrorModal} onHide={handleCloseErrorModal}>
         <Modal.Header closeButton>
           <Modal.Title>An error occurred</Modal.Title>
@@ -357,7 +437,8 @@ function MainPage() {
       </div>
 
       {/* Generate Keywords Accordion */}
-      <div className="accordion-section">
+      <KeywordComponent toggleAccordion={toggleAccordion} summaryResult={summaryResult} activeAccordion={activeAccordion} />
+      {/* <div className="accordion-section">
         <button
           onClick={() => {
             toggleAccordion(1);
@@ -376,59 +457,9 @@ function MainPage() {
             <p>{generatedKeywords}</p>
           </div>
         </div>
-      </div>
-
-      {/* Detect Language Accordion */}
-      <div className="accordion-section">
-        <button
-          onClick={() => {
-            toggleAccordion(2);
-            detectLanguage();
-          }}
-        >
-          Detect Language
-        </button>
-        <div
-          className={`accordion-content ${
-            activeAccordion === 2 ? "active" : ""
-          }`}
-        >
-          <h3>Detected Language:</h3>
-          {languageDetectionResult && (
-            <div>
-              <p>{languageDetectionResult}</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Analyse Sentiment Accordion */}
-      <div className="accordion-section">
-        <button
-          onClick={() => {
-            toggleAccordion(3);
-            analyzeSentiment();
-          }}
-        >
-          Analyse Sentiment
-        </button>
-        <div
-          className={`accordion-content ${
-            activeAccordion === 3 ? "active" : ""
-          }`}
-        >
-          <h3>Detected Sentiment:</h3>
-          {sentimentAnalysisResult && (
-            <div>
-              <SentimentBar
-                sentimentAnalysisResult={sentimentAnalysisResult}
-                aggregateSentiment={aggregateSentiment}
-              />
-            </div>
-          )}
-        </div>
-      </div>
+      </div> */}
     </div>
+    </>
   );
 }
 
