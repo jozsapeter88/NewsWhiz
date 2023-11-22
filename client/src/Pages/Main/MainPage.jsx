@@ -5,6 +5,7 @@ import SentimentBar from "../../Components/SentimentBar";
 import TopNavbar from "../../Components/TopNavbar";
 import KeywordComponent from "../../Components/KeywordComponent";
 import SummaryComponent from "../../Components/SummaryGeneration";
+import CustomSpinner from "../../Components/CustomSpinner";
 
 function MainPage() {
   const [newsSites, setNewsSites] = useState([]);
@@ -320,11 +321,13 @@ function MainPage() {
         </Card>
       </div>
       <div>
-        {loading && (
+      {loading && <CustomSpinner />}
+
+        {/* {loading && (
           <div className="loading-spinner-container">
             <div className="loader"></div>
           </div>
-        )}
+        )} */}
         {title && cleanedArticle && (
           <Card className="result-container">
             <h2>{title}</h2>

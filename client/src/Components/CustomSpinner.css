@@ -1,0 +1,20 @@
+/* CustomSpinner.css */
+
+.custom-spinner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Set a high z-index to ensure it overlays everything */
+  }
+  
+  .custom-spinner-overlay img {
+    width: 400px; /* Adjust the width based on your design */
+    height: 400px; /* Adjust the height based on your design */
+    /* Add any additional styling as needed */
+  }
+  
