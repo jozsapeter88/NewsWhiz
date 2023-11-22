@@ -3,6 +3,7 @@ import { Accordion, Card, Modal, Button } from "react-bootstrap";
 import "./MainPage.css";
 import SentimentBar from "../../Components/SentimentBar";
 import TopNavbar from "../../Components/TopNavbar";
+import KeywordComponent from "../../Components/KeywordGeneration";
 
 function MainPage() {
   const [newsSites, setNewsSites] = useState([]);
@@ -321,8 +322,9 @@ function MainPage() {
   };
 
   return (
-    <div className={`main-container ${isDarkMode ? "dark-mode" : ""}`}>
+    <>
       <TopNavbar />
+    <div className={`main-container ${isDarkMode ? "dark-mode" : ""}`}>
       <div className="control">
         <input
           className="url-input"
@@ -435,7 +437,8 @@ function MainPage() {
       </div>
 
       {/* Generate Keywords Accordion */}
-      <div className="accordion-section">
+      <KeywordComponent toggleAccordion={toggleAccordion} summaryResult={summaryResult} activeAccordion={activeAccordion} />
+      {/* <div className="accordion-section">
         <button
           onClick={() => {
             toggleAccordion(1);
@@ -454,8 +457,9 @@ function MainPage() {
             <p>{generatedKeywords}</p>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
+    </>
   );
 }
 
