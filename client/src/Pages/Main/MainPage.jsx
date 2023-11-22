@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Accordion, Card, Modal, Button } from "react-bootstrap";
 import "./MainPage.css";
 import SentimentBar from "../../Components/SentimentBar";
+import TopNavbar from "../../Components/TopNavbar";
 
 function MainPage() {
   const [newsSites, setNewsSites] = useState([]);
@@ -26,7 +27,6 @@ function MainPage() {
   };
 
   useEffect(() => {
-    // You can apply different styles or themes based on the mode
     if (isDarkMode) {
       document.body.classList.add("dark-mode");
     } else {
@@ -69,11 +69,11 @@ function MainPage() {
       return "default";
     }
   };
-  
+
   const handleScrapeClick = async () => {
     if (selectedSite && url) {
       setLoading(true);
-const requestData = {
+      const requestData = {
         selectedSite: selectedSite.name,
         url: url,
       };
@@ -104,15 +104,15 @@ const requestData = {
 
           setTitle(data.title);
           setArticle(data.article);
-await summarizeText();
+          await summarizeText();
 
-              // Detect language
-              await detectLanguage();
+          // Detect language
+          await detectLanguage();
 
-              // Analyze sentiment
-              await analyzeSentiment();
-            } else {
-              console.log(requestData);
+          // Analyze sentiment
+          await analyzeSentiment();
+        } else {
+          console.log(requestData);
           console.error("Error scraping website");
           setTitle("");
           setArticle("");
@@ -322,6 +322,7 @@ await summarizeText();
 
   return (
     <div className={`main-container ${isDarkMode ? "dark-mode" : ""}`}>
+      <TopNavbar />
       <div className="control">
         <input
           className="url-input"
@@ -454,19 +455,6 @@ await summarizeText();
           </div>
         </div>
       </div>
-
-      {/* Dark-Light Mode Switch */}
-      <div className="dark-light-mode-switch">
-        <label>
-          Dark Mode
-          <input
-            type="checkbox"
-            checked={isDarkMode}
-            onChange={toggleDarkMode}
-          />
-        </label>
-      </div>
-
     </div>
   );
 }
