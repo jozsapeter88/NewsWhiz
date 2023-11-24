@@ -76,57 +76,67 @@ function MainPage() {
   const handleScrapeClick = async () => {
     if (selectedSite && url) {
       setLoading(true);
-      const requestData = {
-        selectedSite: selectedSite.name,
-        url: url,
-      };
 
-      try {
-        const response = await fetch(
-          "http://localhost:5092/api/NewsSite/scrape",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(requestData),
-          }
-        );
+      const scrapeProcess = async () => {
+        const requestData = {
+          selectedSite: selectedSite.name,
+          url: url,
+        };
 
-        if (response.ok) {
-          const data = await response.json();
+        try {
+          const response = await fetch(
+            "http://localhost:5092/api/NewsSite/scrape",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(requestData),
+            }
+          );
 
-          // Check if the content is empty or not suitable for summarization
-          if (!data || !data.title || !data.article) {
-            console.error("Empty or invalid content");
+          if (response.ok) {
+            const data = await response.json();
+
+            // Check if the content is empty or not suitable for summarization
+            if (!data || !data.title || !data.article) {
+              console.error("Empty or invalid content");
+              setTitle("");
+              setArticle("");
+              setShowErrorModal(true);
+              return;
+            }
+
+            setTitle(data.title);
+            setArticle(data.article);
+            await summarizeText();
+
+            // Detect language
+            await detectLanguage();
+
+            // Analyze sentiment
+            await analyzeSentiment();
+          } else {
+            console.log(requestData);
+            console.error("Error scraping website");
             setTitle("");
             setArticle("");
             setShowErrorModal(true);
-            return;
           }
-
-          setTitle(data.title);
-          setArticle(data.article);
-          await summarizeText();
-
-          // Detect language
-          await detectLanguage();
-
-          // Analyze sentiment
-          await analyzeSentiment();
-        } else {
-          console.log(requestData);
-          console.error("Error scraping website");
-          setTitle("");
-          setArticle("");
-          setShowErrorModal(true);
+        } catch (error) {
+          console.error("Error fetching data:", error);
+          setTitle("Error");
+          setArticle("Error");
+        } finally {
+          setLoading(false);
         }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setTitle("Error");
-        setArticle("Error");
-      } finally {
-        setLoading(false);
+      };
+
+      // Execute scrapeProcess 3 times with a 5-second delay between each execution
+      for (let i = 0; i < 3; i++) {
+        await scrapeProcess();
+        // Delay for 5 seconds
+        await new Promise((resolve) => setTimeout(resolve, 5000));
       }
     } else {
       console.error("Selected NewsSite or URL is missing.");
@@ -283,101 +293,109 @@ function MainPage() {
   return (
     <>
       <TopNavbar />
-    <div className={`main-container ${isDarkMode ? "dark-mode" : ""}`}>
-      <div className="control">
-        <input
-          className="url-input"
-          type="text"
-          placeholder="Paste URL"
-          value={url}
-          onChange={handleUrlChange}
-        />
-        <div className="button-container">
-          <Button onClick={handleDetectClick}>Detect</Button>
-          <Button
-            onClick={handleScrapeClick}
-            disabled={scrapeButtonDisabled}
-            className="button-scrape"
-          >
-            Scrape!
-          </Button>
+      <div className={`main-container ${isDarkMode ? "dark-mode" : ""}`}>
+        <div className="control">
+          <input
+            className="url-input"
+            type="text"
+            placeholder="Paste URL"
+            value={url}
+            onChange={handleUrlChange}
+          />
+          <div className="button-container">
+            <Button onClick={handleDetectClick}>Detect</Button>
+            <Button
+              onClick={handleScrapeClick}
+              disabled={scrapeButtonDisabled}
+              className="button-scrape"
+            >
+              Scrape!
+            </Button>
+          </div>
         </div>
-      </div>
-      <div className="cards-container">
-        <Card className="detected-site">
-          {selectedSite && (
-            <div>
-              <h3>{selectedSite.name}</h3>
-            </div>
-          )}
-        </Card>
+        <div className="cards-container">
+          <Card className="detected-site">
+            {selectedSite && (
+              <div>
+                <h3>{selectedSite.name}</h3>
+              </div>
+            )}
+          </Card>
 
-        <Card className="detected-lang">
-          {languageDetectionResult && (
-            <div>
-              <h3>{languageDetectionResult}</h3>
-            </div>
-          )}
-        </Card>
-      </div>
-      <div>
-      {loading && <CustomSpinner />}
+          <Card className="detected-lang">
+            {languageDetectionResult && (
+              <div>
+                <h3>{languageDetectionResult}</h3>
+              </div>
+            )}
+          </Card>
+        </div>
+        <div>
+          {loading && <CustomSpinner />}
 
-        {/* {loading && (
+          {/* {loading && (
           <div className="loading-spinner-container">
             <div className="loader"></div>
           </div>
         )} */}
-        {title && cleanedArticle && (
-          <Card className="result-container">
-            <h2>{title}</h2>
-            <p className="article-text">
-              {showFullContent
-                ? cleanedArticle
-                : `${cleanedArticle.slice(0, 1200)}...`}
-            </p>
-            {cleanedArticle.length > 1200 && (
-              <button onClick={() => setShowFullContent(!showFullContent)}>
-                {showFullContent ? "View less" : "View more..."}
-              </button>
-            )}
-          </Card>
-        )}
-        <div className="sentiment-result">
-          {sentimentAnalysisResult && (
-            <>
-              <p>
-                Sentiment analysis result: mostly{" "}
-                <b>{sentimentAnalysisResult}</b>
+          {title && cleanedArticle && (
+            <Card className="result-container">
+              <h2>{title}</h2>
+              <p className="article-text">
+                {showFullContent
+                  ? cleanedArticle
+                  : `${cleanedArticle.slice(0, 1200)}...`}
               </p>
-              <div>
-                <SentimentBar
-                  sentimentAnalysisResult={sentimentAnalysisResult}
-                  aggregateSentiment={aggregateSentiment}
-                />
-              </div>
-            </>
+              {cleanedArticle.length > 1200 && (
+                <button onClick={() => setShowFullContent(!showFullContent)}>
+                  {showFullContent ? "View less" : "View more..."}
+                </button>
+              )}
+            </Card>
           )}
+          <div className="sentiment-result">
+            {sentimentAnalysisResult && (
+              <>
+                <p>
+                  Sentiment analysis result: mostly{" "}
+                  <b>{sentimentAnalysisResult}</b>
+                </p>
+                <div>
+                  <SentimentBar
+                    sentimentAnalysisResult={sentimentAnalysisResult}
+                    aggregateSentiment={aggregateSentiment}
+                  />
+                </div>
+              </>
+            )}
+          </div>
         </div>
-      </div>
-      <Modal show={showErrorModal} onHide={handleCloseErrorModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>An error occurred</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          Check your URL format ("https://www.example.com") or choose the
-          correct webpage.
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="primary" onClick={handleCloseErrorModal}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
+        <Modal show={showErrorModal} onHide={handleCloseErrorModal}>
+          <Modal.Header closeButton>
+            <Modal.Title>An error occurred</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            Check your URL format ("https://www.example.com") or choose the
+            correct webpage.
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="primary" onClick={handleCloseErrorModal}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
 
-      <SummaryComponent toggleAccordion={toggleAccordion} activeAccordion={activeAccordion} cleanedArticle={cleanedArticle} />
-      <KeywordComponent toggleAccordion={toggleAccordion} summaryResult={summaryResult} activeAccordion={activeAccordion} />
-    </div>
+        <SummaryComponent
+          toggleAccordion={toggleAccordion}
+          activeAccordion={activeAccordion}
+          cleanedArticle={cleanedArticle}
+        />
+        <KeywordComponent
+          toggleAccordion={toggleAccordion}
+          summaryResult={summaryResult}
+          activeAccordion={activeAccordion}
+        />
+      </div>
     </>
   );
 }
