@@ -1,6 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using server.Models.DBContext;
 using server.Services;
+using Microsoft.AspNetCore.Identity;
+using server.Areas.Identity.Data;
+using server.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors(options =>
@@ -21,6 +24,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+
+builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<AuthDbContext>();
+
 builder.Services.AddTransient<INewsSiteService, NewsSiteService>();
 
 var app = builder.Build();
