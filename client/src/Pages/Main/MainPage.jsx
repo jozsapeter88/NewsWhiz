@@ -3,7 +3,9 @@ import { Accordion, Card, Modal, Button } from "react-bootstrap";
 import "./MainPage.css";
 import SentimentBar from "../../Components/SentimentBar";
 import TopNavbar from "../../Components/TopNavbar";
-import KeywordComponent from "../../Components/KeywordGeneration";
+import KeywordComponent from "../../Components/KeywordComponent";
+import SummaryComponent from "../../Components/SummaryGeneration";
+import CustomSpinner from "../../Components/CustomSpinner";
 
 function MainPage() {
   const [newsSites, setNewsSites] = useState([]);
@@ -74,57 +76,67 @@ function MainPage() {
   const handleScrapeClick = async () => {
     if (selectedSite && url) {
       setLoading(true);
-      const requestData = {
-        selectedSite: selectedSite.name,
-        url: url,
-      };
 
-      try {
-        const response = await fetch(
-          "http://localhost:5092/api/NewsSite/scrape",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(requestData),
-          }
-        );
+      const scrapeProcess = async () => {
+        const requestData = {
+          selectedSite: selectedSite.name,
+          url: url,
+        };
 
-        if (response.ok) {
-          const data = await response.json();
+        try {
+          const response = await fetch(
+            "http://localhost:5092/api/NewsSite/scrape",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(requestData),
+            }
+          );
 
-          // Check if the content is empty or not suitable for summarization
-          if (!data || !data.title || !data.article) {
-            console.error("Empty or invalid content");
+          if (response.ok) {
+            const data = await response.json();
+
+            // Check if the content is empty or not suitable for summarization
+            if (!data || !data.title || !data.article) {
+              console.error("Empty or invalid content");
+              setTitle("");
+              setArticle("");
+              setShowErrorModal(true);
+              return;
+            }
+
+            setTitle(data.title);
+            setArticle(data.article);
+            await summarizeText();
+
+            // Detect language
+            await detectLanguage();
+
+            // Analyze sentiment
+            await analyzeSentiment();
+          } else {
+            console.log(requestData);
+            console.error("Error scraping website");
             setTitle("");
             setArticle("");
             setShowErrorModal(true);
-            return;
           }
-
-          setTitle(data.title);
-          setArticle(data.article);
-          await summarizeText();
-
-          // Detect language
-          await detectLanguage();
-
-          // Analyze sentiment
-          await analyzeSentiment();
-        } else {
-          console.log(requestData);
-          console.error("Error scraping website");
-          setTitle("");
-          setArticle("");
-          setShowErrorModal(true);
+        } catch (error) {
+          console.error("Error fetching data:", error);
+          setTitle("Error");
+          setArticle("Error");
+        } finally {
+          setLoading(false);
         }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        setTitle("Error");
-        setArticle("Error");
-      } finally {
-        setLoading(false);
+      };
+
+      // Execute scrapeProcess 3 times with a 5-second delay between each execution
+      for (let i = 0; i < 3; i++) {
+        await scrapeProcess();
+        // Delay for 5 seconds
+        await new Promise((resolve) => setTimeout(resolve, 5000));
       }
     } else {
       console.error("Selected NewsSite or URL is missing.");
@@ -193,49 +205,6 @@ function MainPage() {
         setSummaryResult(result.summary);
       } else {
         console.error("Error in summarization:", result.msg);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const generateKeywords = async () => {
-    const url = "https://microsoft-text-analytics1.p.rapidapi.com/keyPhrases";
-    const options = {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "X-RapidAPI-Key": "21ab335ba4msh85f8c88bb6ae3f6p14ac31jsn78a47852eb0d",
-        "X-RapidAPI-Host": "microsoft-text-analytics1.p.rapidapi.com",
-      },
-      body: JSON.stringify({
-        documents: [
-          {
-            id: "1",
-            language: "en",
-            text: summaryResult,
-          },
-        ],
-      }),
-    };
-
-    try {
-      const response = await fetch(url, options);
-      const result = await response.json();
-
-      if (result.documents && result.documents.length > 0) {
-        const keyPhrases = result.documents[0].keyPhrases;
-
-        if (keyPhrases && keyPhrases.length > 0) {
-          const formattedKeywords = keyPhrases
-            .map((keyword) => `"${keyword}"`)
-            .join(" ");
-          setGeneratedKeywords(formattedKeywords);
-        } else {
-          console.error("No key phrases found in the response");
-        }
-      } else {
-        console.error("Invalid response format");
       }
     } catch (error) {
       console.error(error);
@@ -324,141 +293,109 @@ function MainPage() {
   return (
     <>
       <TopNavbar />
-    <div className={`main-container ${isDarkMode ? "dark-mode" : ""}`}>
-      <div className="control">
-        <input
-          className="url-input"
-          type="text"
-          placeholder="Paste URL"
-          value={url}
-          onChange={handleUrlChange}
-        />
-        <div className="button-container">
-          <Button onClick={handleDetectClick}>Detect</Button>
-          <Button
-            onClick={handleScrapeClick}
-            disabled={scrapeButtonDisabled}
-            className="button-scrape"
-          >
-            Scrape!
-          </Button>
+      <div className={`main-container ${isDarkMode ? "dark-mode" : ""}`}>
+        <div className="control">
+          <input
+            className="url-input"
+            type="text"
+            placeholder="Paste URL"
+            value={url}
+            onChange={handleUrlChange}
+          />
+          <div className="button-container">
+            <Button onClick={handleDetectClick}>Detect</Button>
+            <Button
+              onClick={handleScrapeClick}
+              disabled={scrapeButtonDisabled}
+              className="button-scrape"
+            >
+              Scrape!
+            </Button>
+          </div>
         </div>
-      </div>
-      <div className="cards-container">
-        <Card className="detected-site">
-          {selectedSite && (
-            <div>
-              <h3>{selectedSite.name}</h3>
-            </div>
-          )}
-        </Card>
+        <div className="cards-container">
+          <Card className="detected-site">
+            {selectedSite && (
+              <div>
+                <h3>{selectedSite.name}</h3>
+              </div>
+            )}
+          </Card>
 
-        <Card className="detected-lang">
-          {languageDetectionResult && (
-            <div>
-              <h3>{languageDetectionResult}</h3>
-            </div>
-          )}
-        </Card>
-      </div>
-      <div>
-        {loading && (
+          <Card className="detected-lang">
+            {languageDetectionResult && (
+              <div>
+                <h3>{languageDetectionResult}</h3>
+              </div>
+            )}
+          </Card>
+        </div>
+        <div>
+          {loading && <CustomSpinner />}
+
+          {/* {loading && (
           <div className="loading-spinner-container">
             <div className="loader"></div>
           </div>
-        )}
-        {title && cleanedArticle && (
-          <Card className="result-container">
-            <h2>{title}</h2>
-            <p className="article-text">
-              {showFullContent
-                ? cleanedArticle
-                : `${cleanedArticle.slice(0, 1200)}...`}
-            </p>
-            {cleanedArticle.length > 1200 && (
-              <button onClick={() => setShowFullContent(!showFullContent)}>
-                {showFullContent ? "View less" : "View more..."}
-              </button>
-            )}
-          </Card>
-        )}
-        <div className="sentiment-result">
-          {sentimentAnalysisResult && (
-            <>
-              <p>
-                Sentiment analysis result: mostly{" "}
-                <b>{sentimentAnalysisResult}</b>
+        )} */}
+          {title && cleanedArticle && (
+            <Card className="result-container">
+              <h2>{title}</h2>
+              <p className="article-text">
+                {showFullContent
+                  ? cleanedArticle
+                  : `${cleanedArticle.slice(0, 1200)}...`}
               </p>
-              <div>
-                <SentimentBar
-                  sentimentAnalysisResult={sentimentAnalysisResult}
-                  aggregateSentiment={aggregateSentiment}
-                />
-              </div>
-            </>
+              {cleanedArticle.length > 1200 && (
+                <button onClick={() => setShowFullContent(!showFullContent)}>
+                  {showFullContent ? "View less" : "View more..."}
+                </button>
+              )}
+            </Card>
           )}
-        </div>
-      </div>
-      <Modal show={showErrorModal} onHide={handleCloseErrorModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>An error occurred</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          Check your URL format ("https://www.example.com") or choose the
-          correct webpage.
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="primary" onClick={handleCloseErrorModal}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      {/* Summarize Accordion */}
-      <div className="accordion-section">
-        <button
-          onClick={() => {
-            toggleAccordion(0);
-            summarizeText();
-          }}
-        >
-          Summarize
-        </button>
-        <div
-          className={`accordion-content ${
-            activeAccordion === 0 ? "active" : ""
-          }`}
-        >
-          <h3>Summary:</h3>
-          <div className="summarize">
-            <p>{summaryResult}</p>
+          <div className="sentiment-result">
+            {sentimentAnalysisResult && (
+              <>
+                <p>
+                  Sentiment analysis result: mostly{" "}
+                  <b>{sentimentAnalysisResult}</b>
+                </p>
+                <div>
+                  <SentimentBar
+                    sentimentAnalysisResult={sentimentAnalysisResult}
+                    aggregateSentiment={aggregateSentiment}
+                  />
+                </div>
+              </>
+            )}
           </div>
         </div>
-      </div>
+        <Modal show={showErrorModal} onHide={handleCloseErrorModal}>
+          <Modal.Header closeButton>
+            <Modal.Title>An error occurred</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            Check your URL format ("https://www.example.com") or choose the
+            correct webpage.
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="primary" onClick={handleCloseErrorModal}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
 
-      {/* Generate Keywords Accordion */}
-      <KeywordComponent toggleAccordion={toggleAccordion} summaryResult={summaryResult} activeAccordion={activeAccordion} />
-      {/* <div className="accordion-section">
-        <button
-          onClick={() => {
-            toggleAccordion(1);
-            generateKeywords();
-          }}
-        >
-          Generate Keywords
-        </button>
-        <div
-          className={`accordion-content ${
-            activeAccordion === 1 ? "active" : ""
-          }`}
-        >
-          <h3>Generated Keywords:</h3>
-          <div className="generated-keywords">
-            <p>{generatedKeywords}</p>
-          </div>
-        </div>
-      </div> */}
-    </div>
+        <SummaryComponent
+          toggleAccordion={toggleAccordion}
+          activeAccordion={activeAccordion}
+          cleanedArticle={cleanedArticle}
+        />
+        <KeywordComponent
+          toggleAccordion={toggleAccordion}
+          summaryResult={summaryResult}
+          activeAccordion={activeAccordion}
+        />
+      </div>
     </>
   );
 }

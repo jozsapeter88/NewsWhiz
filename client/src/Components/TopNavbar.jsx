@@ -3,6 +3,8 @@ import Navbar from "react-bootstrap/Navbar";
 import React from "react";
 import { useState, useEffect } from "react";
 import "./TopNavbar.css";
+import { MdOutlineDarkMode } from "react-icons/md";
+import { MdOutlineLightMode } from "react-icons/md";
 
 function TopNavbar() {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -25,15 +27,24 @@ function TopNavbar() {
       variant={isDarkMode ? "dark" : "light"}
     >
       <Container>
-        <Navbar.Brand href="#home">NewsWhiz</Navbar.Brand>
+        <Navbar.Brand href="#">
+          <img
+            src="assets/images/nav.png"
+            alt="logo"
+            style={{ height: "100px", width: "200px" }}
+          />
+        </Navbar.Brand>
         <Navbar.Toggle />
         <Navbar.Collapse className="justify-content-end">
+          <Navbar.Text>
+            <MdOutlineLightMode />
+          </Navbar.Text>
           <Navbar.Text>
             {/* Dark-Light Mode Switch */}
             <section class="container mb-4 pb-3">
               <div class="row">
                 <div class="col-xs-12">
-                  <div class="form-check"> 
+                  <div class="form-check">
                     <label class="form-check-label form-check-toggle">
                       <input
                         class="form-check-input"
@@ -47,6 +58,9 @@ function TopNavbar() {
                 </div>
               </div>
             </section>
+          </Navbar.Text>
+          <Navbar.Text>
+            <MdOutlineDarkMode />
           </Navbar.Text>
         </Navbar.Collapse>
       </Container>
