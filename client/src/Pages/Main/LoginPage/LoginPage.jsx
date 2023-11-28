@@ -1,7 +1,7 @@
 import React, { useState} from "react";
-import SignIn from "../SignIn/SignIn";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../Contexts/AuthContext";
+import { useAuth } from "../../../Contexts/AuthContext";
+import Signin from "../../../Components/Signin";
 
 const LoginPage = () => {
     const navigate = useNavigate();
@@ -50,11 +50,11 @@ const LoginPage = () => {
           };
     
     return (
-    <SignIn 
+    <Signin
     onSubmit={onSubmit} 
     showMsg={showMsg} 
     rememberMe={rememberMe}
-    handleRememberMeChange={handleRememberMeChange}></SignIn>)
+    handleRememberMeChange={handleRememberMeChange}></Signin>)
 }
 
 export default LoginPage;

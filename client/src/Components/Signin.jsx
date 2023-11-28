@@ -1,7 +1,7 @@
 import { Col, Button, Row, Container, Card, Form } from "react-bootstrap";
-import "./SignIn.css";
+import "./Signin.css";
 
-const SignIn = ({ onSubmit, showMsg, rememberMe, handleRememberMeChange }) => {
+const Signin = ({ onSubmit, showMsg, rememberMe, handleRememberMeChange }) => {
   return (
     <div>
       <Container>
@@ -91,4 +91,4 @@ const SignIn = ({ onSubmit, showMsg, rememberMe, handleRememberMeChange }) => {
     </div>
   );
 };
-export default SignIn;
+export default Signin;
