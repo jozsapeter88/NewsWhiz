@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity.UI.V4.Pages.Account.Internal;
-using Microsoft.AspNetCore.Mvc;
-using server.Areas.Identity.Data;
+﻿using Microsoft.AspNetCore.Mvc;
+using server.Areas.Identity.Data.Models;
+using server.Areas.Identity.Enum;
 using server.Services;
 
 namespace server.Controllers;

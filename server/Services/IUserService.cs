@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using server.Areas.Identity.Data;
+using server.Areas.Identity.Data.Models;
 
 namespace server.Services;
 

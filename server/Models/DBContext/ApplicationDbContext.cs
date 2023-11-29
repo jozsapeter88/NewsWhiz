@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using server.Areas.Identity.Data;
+using server.Areas.Identity.Data.Models;
 
 namespace server.Models.DBContext
 {
