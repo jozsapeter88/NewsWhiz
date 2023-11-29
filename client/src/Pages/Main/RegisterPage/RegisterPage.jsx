@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import Signup from '../../../Components/Signup';
 
-const RegisterPage = async (formData) => {
+const Register = async (formData) => {
     try {
         const response = await fetch(process.env.REACT_APP_API_URL + '/user/register', {
             method: 'POST',
@@ -36,7 +36,7 @@ const RegistrationForm = () => {
             email: e.target.formBasicEmail.value,
             password: e.target.formBasicPassword.value,
         }
-        const auth = await RegisterPage(regObj);
+        const auth = await Register(regObj);
         if(auth.status === 401) {
             setShowMsg(false);
             console.error("Username is already taken!")
@@ -58,4 +58,4 @@ const RegistrationForm = () => {
     );
 }
 
-export default RegisterPage;
+export default RegistrationForm;
