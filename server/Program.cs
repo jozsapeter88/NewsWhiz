@@ -17,6 +17,7 @@ builder.Services.AddCors(options =>
                 .AllowAnyMethod()
                 .AllowCredentials();
         });
+
 });
 
 builder.Services.AddControllers();
@@ -37,11 +38,16 @@ var app = builder.Build();
 using (var serviceScope = app.Services.CreateScope())
 {
     var context = serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-
-    if (context.Database.EnsureCreated())
+    
+    try
     {
         DataSeed.Initialize(context);
     }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error during database seeding: {ex.Message}");
+    }
+
 }
 
 //Add adminUser

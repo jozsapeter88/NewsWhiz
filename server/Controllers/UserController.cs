@@ -50,5 +50,13 @@ public class UserController: ControllerBase
         if (result is not null) return Ok(result);
         return NotFound("No users found");
     }
-
+    
+    [HttpGet("user/{userId}")]
+    public async Task<ActionResult<List<User>>> GetUser()
+    {
+        var result = await _userService.GetAllUsers();
+        if (result is null) return NotFound("No User Found");
+        return Ok(result);
+    }
+    
 }

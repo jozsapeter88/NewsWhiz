@@ -24,10 +24,7 @@ function App() {
   return (
     <div className="App">
       <Routes>
-        <Route
-          path="/"
-          element={isAuthenticated([0, 1]) ? <MainPage /> : <LoginPage />}
-        />
+        <Route path="/" element={<MainPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegistrationForm />} />
       </Routes>

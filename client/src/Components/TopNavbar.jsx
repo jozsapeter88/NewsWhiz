@@ -1,25 +1,27 @@
-import Container from "react-bootstrap/Container";
+// TopNavbar.js
+
+import React, { useState } from "react";
 import Navbar from "react-bootstrap/Navbar";
-import React from "react";
-import { useState, useEffect } from "react";
+import Container from "react-bootstrap/Container";
+import { Link } from "react-router-dom";
+import { MdOutlineDarkMode, MdOutlineLightMode } from "react-icons/md";
+import { useAuth } from "../Contexts/AuthContext"; // Import useAuth hook
 import "./TopNavbar.css";
-import { MdOutlineDarkMode } from "react-icons/md";
-import { MdOutlineLightMode } from "react-icons/md";
+import DropdownButton from "react-bootstrap/DropdownButton";
+import Dropdown from "react-bootstrap/Dropdown";
 
 function TopNavbar() {
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const { user, logout } = useAuth(); // Access user information from useAuth hook
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
   };
 
-  useEffect(() => {
-    if (isDarkMode) {
-      document.body.classList.add("dark-mode");
-    } else {
-      document.body.classList.remove("dark-mode");
-    }
-  }, [isDarkMode]);
+  const handleLogout = () => {
+    // Call the logout function from the authentication context
+    logout();
+  };
 
   return (
     <Navbar
@@ -27,7 +29,7 @@ function TopNavbar() {
       variant={isDarkMode ? "dark" : "light"}
     >
       <Container>
-        <Navbar.Brand href="#">
+        <Navbar.Brand href="/">
           <img
             src="assets/images/nav.png"
             alt="logo"
@@ -40,14 +42,13 @@ function TopNavbar() {
             <MdOutlineLightMode />
           </Navbar.Text>
           <Navbar.Text>
-            {/* Dark-Light Mode Switch */}
-            <section class="container mb-4 pb-3">
-              <div class="row">
-                <div class="col-xs-12">
-                  <div class="form-check">
-                    <label class="form-check-label form-check-toggle">
+            <section className="container mb-4 pb-3">
+              <div className="row">
+                <div className="col-xs-12">
+                  <div className="form-check">
+                    <label className="form-check-label form-check-toggle">
                       <input
-                        class="form-check-input"
+                        className="form-check-input"
                         type="checkbox"
                         checked={isDarkMode}
                         onChange={toggleDarkMode}
@@ -62,6 +63,26 @@ function TopNavbar() {
           <Navbar.Text>
             <MdOutlineDarkMode />
           </Navbar.Text>
+          {user ? (
+            <DropdownButton
+              title={
+                <span>
+                  Logged in as{" "}
+                  <strong style={{ color: "blue" }}>{user.userName}</strong>
+                </span>
+              }
+              id="dropdown-menu-align-right"
+              variant={isDarkMode ? "dark" : "light"}
+            >
+              <Dropdown.Item onClick={handleLogout}>Logout</Dropdown.Item>
+            </DropdownButton>
+          ) : (
+            <Navbar.Text>
+              <Link to="/login" className="nav-link">
+                Login
+              </Link>
+            </Navbar.Text>
+          )}
         </Navbar.Collapse>
       </Container>
     </Navbar>
