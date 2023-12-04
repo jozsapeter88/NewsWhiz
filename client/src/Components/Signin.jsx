@@ -8,13 +8,13 @@ const Signin = ({ onSubmit, showMsg, rememberMe, handleRememberMeChange }) => {
         <Row className="vh-100 d-flex justify-content-center align-items-center">
           <Col md={4} lg={6} xs={12}>
             <img
-              src={process.env.PUBLIC_URL + "/newlogo_transparent.png"}
+              src={"assets/images/nav.png"}
               alt="img"
               className="img-fluid"
               style={{
                 marginLeft: "",
-                maxWidth: "600px",
-                maxHeight: "600px",
+                maxWidth: "500px",
+                maxHeight: "500px",
               }}
             />{" "}
           </Col>
@@ -59,7 +59,7 @@ const Signin = ({ onSubmit, showMsg, rememberMe, handleRememberMeChange }) => {
                       onChange={handleRememberMeChange}
                   /></Form.Group>
                       <div className="d-grid">
-                        <Button variant="warning" type="submit">
+                        <Button variant="primary" type="submit">
                           Login
                         </Button>
                       </div>
