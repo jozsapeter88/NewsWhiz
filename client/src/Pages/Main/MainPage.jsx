@@ -6,6 +6,7 @@ import TopNavbar from "../../Components/TopNavbar";
 import KeywordComponent from "../../Components/KeywordComponent";
 import SummaryComponent from "../../Components/SummaryGeneration";
 import CustomSpinner from "../../Components/CustomSpinner";
+import { useDarkMode } from "../../Contexts/DarkModeContext";
 
 function MainPage() {
   const [newsSites, setNewsSites] = useState([]);
@@ -23,11 +24,7 @@ function MainPage() {
   const [scrapeButtonDisabled, setScrapeButtonDisabled] = useState(true);
   const [activeAccordion, setActiveAccordion] = useState(null);
   const [showFullContent, setShowFullContent] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-  };
+  const { isDarkMode } = useDarkMode();
 
   useEffect(() => {
     if (isDarkMode) {

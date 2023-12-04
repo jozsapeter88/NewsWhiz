@@ -9,14 +9,11 @@ import { useAuth } from "../Contexts/AuthContext"; // Import useAuth hook
 import "./TopNavbar.css";
 import DropdownButton from "react-bootstrap/DropdownButton";
 import Dropdown from "react-bootstrap/Dropdown";
+import { useDarkMode } from "../Contexts/DarkModeContext";
 
 function TopNavbar() {
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { isDarkMode, toggleDarkMode } = useDarkMode();
   const { user, logout } = useAuth(); // Access user information from useAuth hook
-
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-  };
 
   const handleLogout = () => {
     // Call the logout function from the authentication context
