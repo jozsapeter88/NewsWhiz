@@ -7,6 +7,7 @@ namespace server.Models.DBContext
     public class ApplicationDbContext : IdentityDbContext<User>
     {
         public DbSet<NewsSite> NewsSites { get; set; }
+        public DbSet<Bookmark> Bookmarks { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
