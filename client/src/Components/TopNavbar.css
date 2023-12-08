@@ -3,6 +3,10 @@
     font-weight: 600;
 }
 
+.bookmarkBtn {
+    margin-right: 40px;
+}
+
 .form-check {
     position: relative;
     display: block;
