@@ -1,7 +1,11 @@
+.loginBtn {
+    margin-left: 100px;
+    font-weight: 600;
+}
+
 .form-check {
     position: relative;
     display: block;
-    /* margin-bottom: 0.75rem; */
 }
 
 .form-check-toggle {
