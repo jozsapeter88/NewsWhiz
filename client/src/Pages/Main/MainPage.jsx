@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Accordion, Card, Modal, Button } from "react-bootstrap";
+import { BsBookmarkStarFill  } from "react-icons/bs";
 import "./MainPage.css";
 import SentimentBar from "../../Components/SentimentBar";
 import TopNavbar from "../../Components/TopNavbar";
@@ -287,6 +288,32 @@ function MainPage() {
     setActiveAccordion(activeAccordion === index ? null : index);
   };
 
+  const handleBookmarkClick = async () => {
+    if (summaryResult) {
+      try {
+        const response = await fetch("http://localhost:5092/api/Bookmark", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            text: summaryResult,
+          }),
+        });
+  
+        if (response.ok) {
+          alert("Bookmark saved!");
+        } else {
+          console.error("Error saving bookmark");
+        }
+      } catch (error) {
+        console.error("Error saving bookmark:", error);
+      }
+    } else {
+      alert("No text to bookmark");
+    }
+  };
+
   return (
     <>
       <TopNavbar />
@@ -326,6 +353,8 @@ function MainPage() {
               </div>
             )}
           </Card>
+          <Button variant="warning" onClick={handleBookmarkClick}><BsBookmarkStarFill/></Button>
+
         </div>
         <div>
           {loading && <CustomSpinner />}
@@ -342,11 +371,12 @@ function MainPage() {
                 {showFullContent
                   ? cleanedArticle
                   : `${cleanedArticle.slice(0, 1200)}...`}
-              </p>
+              </p> 
               {cleanedArticle.length > 1200 && (
                 <button onClick={() => setShowFullContent(!showFullContent)}>
                   {showFullContent ? "View less" : "View more..."}
                 </button>
+                
               )}
             </Card>
           )}

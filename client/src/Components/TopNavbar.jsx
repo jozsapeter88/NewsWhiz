@@ -87,7 +87,7 @@ function TopNavbar() {
               </Dropdown.Item>
             </DropdownButton>
           ) : (
-            <Navbar.Text>
+            <Navbar.Text className="loginBtn">
               <Link to="/login" className="nav-link">
                 Login
               </Link>
