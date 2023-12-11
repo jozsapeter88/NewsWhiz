@@ -8,6 +8,7 @@ import KeywordComponent from "../../Components/KeywordComponent";
 import SummaryComponent from "../../Components/SummaryGeneration";
 import CustomSpinner from "../../Components/CustomSpinner";
 import { useDarkMode } from "../../Contexts/DarkModeContext";
+import { useAuth } from "../../Contexts/AuthContext";
 
 function MainPage() {
   const [newsSites, setNewsSites] = useState([]);
@@ -28,6 +29,7 @@ function MainPage() {
   const [bookmarkName, setBookmarkName] = useState("");
   const [showModal, setShowModal] = useState(false);
   const { isDarkMode } = useDarkMode();
+  const { user } = useAuth();
 
   useEffect(() => {
     if (isDarkMode) {
@@ -294,7 +296,15 @@ function MainPage() {
     setShowModal(true);
   };
 
-const handleSaveBookmark = async () => {
+  const handleSaveBookmark = async () => {
+    const loggedInUser = user && user.id;
+  
+    if (!loggedInUser) {
+      console.error("User not logged in.");
+      // You may want to handle this case, e.g., redirect to login page.
+      return;
+    }
+  
     try {
       const response = await fetch("http://localhost:5092/api/Bookmark", {
         method: "POST",
@@ -304,21 +314,23 @@ const handleSaveBookmark = async () => {
         body: JSON.stringify({
           name: bookmarkName,
           text: cleanedArticle,
+          userId: loggedInUser,
         }),
       });
-
+  
       if (response.ok) {
         alert("Bookmark saved!");
         setShowModal(false);
       } else {
         console.error("Error saving bookmark");
+        console.log(bookmarkName)
+        console.log(cleanedArticle)
+        console.log(loggedInUser)
       }
     } catch (error) {
       console.error("Error saving bookmark:", error);
     }
-
-};
-  
+  };
 
   return (
     <>
@@ -359,8 +371,9 @@ const handleSaveBookmark = async () => {
               </div>
             )}
           </Card>
-          <Button variant="warning" onClick={handleBookmarkClick}><BsBookmarkStarFill/></Button>
-
+          <Button variant="warning" onClick={handleBookmarkClick}>
+            <BsBookmarkStarFill />
+          </Button>
         </div>
         <div>
           {loading && <CustomSpinner />}
@@ -377,12 +390,11 @@ const handleSaveBookmark = async () => {
                 {showFullContent
                   ? cleanedArticle
                   : `${cleanedArticle.slice(0, 1200)}...`}
-              </p> 
+              </p>
               {cleanedArticle.length > 1200 && (
                 <button onClick={() => setShowFullContent(!showFullContent)}>
                   {showFullContent ? "View less" : "View more..."}
                 </button>
-                
               )}
             </Card>
           )}
@@ -418,28 +430,28 @@ const handleSaveBookmark = async () => {
           </Modal.Footer>
         </Modal>
 
-              {/* Modal for entering bookmark name */}
-      <Modal show={showModal} onHide={() => setShowModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Enter Bookmark Name</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <input
-            type="text"
-            value={bookmarkName}
-            onChange={(e) => setBookmarkName(e.target.value)}
-            placeholder="Enter bookmark name"
-          />
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
-            Close
-          </Button>
-          <Button variant="primary" onClick={handleSaveBookmark}>
-            Save Bookmark
-          </Button>
-        </Modal.Footer>
-      </Modal>
+        {/* Modal for entering bookmark name */}
+        <Modal show={showModal} onHide={() => setShowModal(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>Enter Bookmark Name</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <input
+              type="text"
+              value={bookmarkName}
+              onChange={(e) => setBookmarkName(e.target.value)}
+              placeholder="Enter bookmark name"
+            />
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowModal(false)}>
+              Close
+            </Button>
+            <Button variant="primary" onClick={handleSaveBookmark}>
+              Save Bookmark
+            </Button>
+          </Modal.Footer>
+        </Modal>
 
         <SummaryComponent
           toggleAccordion={toggleAccordion}
