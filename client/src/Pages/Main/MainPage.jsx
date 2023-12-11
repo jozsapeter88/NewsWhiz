@@ -25,6 +25,8 @@ function MainPage() {
   const [scrapeButtonDisabled, setScrapeButtonDisabled] = useState(true);
   const [activeAccordion, setActiveAccordion] = useState(null);
   const [showFullContent, setShowFullContent] = useState(false);
+  const [bookmarkName, setBookmarkName] = useState("");
+  const [showModal, setShowModal] = useState(false);
   const { isDarkMode } = useDarkMode();
 
   useEffect(() => {
@@ -289,30 +291,34 @@ function MainPage() {
   };
 
   const handleBookmarkClick = async () => {
-    if (summaryResult) {
-      try {
-        const response = await fetch("http://localhost:5092/api/Bookmark", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            text: summaryResult,
-          }),
-        });
-  
-        if (response.ok) {
-          alert("Bookmark saved!");
-        } else {
-          console.error("Error saving bookmark");
-        }
-      } catch (error) {
-        console.error("Error saving bookmark:", error);
-      }
-    } else {
-      alert("No text to bookmark");
-    }
+    setShowModal(true);
   };
+
+const handleSaveBookmark = async () => {
+    try {
+      const response = await fetch("http://localhost:5092/api/Bookmark", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: bookmarkName,
+          text: cleanedArticle,
+        }),
+      });
+
+      if (response.ok) {
+        alert("Bookmark saved!");
+        setShowModal(false);
+      } else {
+        console.error("Error saving bookmark");
+      }
+    } catch (error) {
+      console.error("Error saving bookmark:", error);
+    }
+
+};
+  
 
   return (
     <>
@@ -411,6 +417,29 @@ function MainPage() {
             </Button>
           </Modal.Footer>
         </Modal>
+
+              {/* Modal for entering bookmark name */}
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Enter Bookmark Name</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <input
+            type="text"
+            value={bookmarkName}
+            onChange={(e) => setBookmarkName(e.target.value)}
+            placeholder="Enter bookmark name"
+          />
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Close
+          </Button>
+          <Button variant="primary" onClick={handleSaveBookmark}>
+            Save Bookmark
+          </Button>
+        </Modal.Footer>
+      </Modal>
 
         <SummaryComponent
           toggleAccordion={toggleAccordion}

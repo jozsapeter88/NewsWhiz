@@ -25,12 +25,12 @@ function App() {
   return (
     <div className="App">
       <DarkModeProvider>
-      <Routes>
-        <Route path="/" element={<MainPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegistrationForm />} />
-      </Routes>
-    </DarkModeProvider>
+        <Routes>
+          <Route path="/" element={<MainPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegistrationForm />} />
+        </Routes>
+      </DarkModeProvider>
     </div>
   );
 }
