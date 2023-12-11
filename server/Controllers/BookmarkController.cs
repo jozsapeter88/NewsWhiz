@@ -18,14 +18,15 @@ public class BookmarkController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> SaveBookmark([FromBody] BookmarkRequest request)
     {
-        if (request == null || string.IsNullOrWhiteSpace(request.Text))
+        if (request == null || string.IsNullOrWhiteSpace(request.Text) || string.IsNullOrWhiteSpace(request.Name))
         {
             return BadRequest("Invalid bookmark data");
         }
 
-        int bookmarkId = await _bookmarkService.SaveBookmarkAsync(request.Text);
+        int bookmarkId = await _bookmarkService.SaveBookmarkAsync(request.Name, request.Text);
         return Ok(new { BookmarkId = bookmarkId });
     }
+
 
     [HttpGet]
     public async Task<IActionResult> GetBookmarks()
