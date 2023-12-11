@@ -26,8 +26,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-builder.Services.AddIdentity<User, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = false)
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddIdentity<User, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
 
 builder.Services.AddTransient<INewsSiteService, NewsSiteService>();
 builder.Services.AddTransient<IUserService, UserService>();
@@ -75,6 +76,7 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+app.UseAuthentication();
 app.UseCors();
 app.MapControllers();
 app.Run();

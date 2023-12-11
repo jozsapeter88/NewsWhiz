@@ -13,16 +13,17 @@ public class BookmarkService : IBookmarkService
         _dbContext = dbContext;
     }
 
-    public async Task<int> SaveBookmarkAsync(string name, string text)
+    public async Task<int> SaveBookmarkAsync(string name, string text, string userId)
     {
-        var bookmark = new Bookmark { Name = name, Text = text };
+        var bookmark = new Bookmark { Name = name, Text = text, UserId = userId };
         _dbContext.Bookmarks.Add(bookmark);
         await _dbContext.SaveChangesAsync();
         return bookmark.Id;
     }
 
-    public async Task<IEnumerable<Bookmark>> GetBookmarksAsync()
+    public async Task<IEnumerable<Bookmark>> GetBookmarksAsync(string userId)
     {
-        return await _dbContext.Bookmarks.ToListAsync();
+        // Retrieve bookmarks associated with the user's ID
+        return await _dbContext.Bookmarks.Where(b => b.UserId == userId).ToListAsync();
     }
 }

@@ -5,6 +5,6 @@ namespace server.Services;
 
 public interface IBookmarkService
 {
-    Task<int> SaveBookmarkAsync(string name, string text);
-    Task<IEnumerable<Bookmark>> GetBookmarksAsync();
+    Task<int> SaveBookmarkAsync(string name, string text, string userId);
+    Task<IEnumerable<Bookmark>> GetBookmarksAsync(string userId);
 }
