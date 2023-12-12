@@ -81,74 +81,66 @@ function MainPage() {
     if (selectedSite && url) {
       setLoading(true);
   
-      const scrapeProcess = async () => {
+      try {
         const requestData = {
           selectedSite: selectedSite.name,
           url: url,
         };
   
-        try {
-          // Compress the 'text' property using pako
-          requestData.text = btoa(pako.deflate(article, { to: 'string' }));
+        // Compress the 'text' property using pako
+        requestData.text = btoa(pako.deflate(article, { to: 'string' }));
   
-          const response = await fetch(
-            "http://localhost:5092/api/NewsSite/scrape",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(requestData),
-            }
-          );
+        const response = await fetch(
+          "http://localhost:5092/api/NewsSite/scrape",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestData),
+          }
+        );
   
-          if (response.ok) {
-            const data = await response.json();
+        if (response.ok) {
+          const data = await response.json();
   
-            // Check if the content is empty or not suitable for summarization
-            if (!data || !data.title || !data.article) {
-              console.error("Empty or invalid content");
-              setTitle("");
-              setArticle("");
-              setShowErrorModal(true);
-              return;
-            }
-  
-            setTitle(data.title);
-            setArticle(data.article);
-            await summarizeText();
-  
-            // Detect language
-            await detectLanguage();
-  
-            // Analyze sentiment
-            await analyzeSentiment();
-          } else {
-            console.log(requestData);
-            console.error("Error scraping website");
+          // Check if the content is empty or not suitable for summarization
+          if (!data || !data.title || !data.article) {
+            console.error("Empty or invalid content");
             setTitle("");
             setArticle("");
             setShowErrorModal(true);
+            return;
           }
-        } catch (error) {
-          console.error("Error fetching data:", error);
-          setTitle("Error");
-          setArticle("Error");
-        } finally {
-          setLoading(false);
-        }
-      };
   
-      // Execute scrapeProcess 3 times with a 5-second delay between each execution
-      for (let i = 0; i < 3; i++) {
-        await scrapeProcess();
-        // Delay for 5 seconds
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+          setTitle(data.title);
+          setArticle(data.article);
+          await summarizeText();
+  
+          // Detect language
+          await detectLanguage();
+  
+          // Analyze sentiment
+          await analyzeSentiment();
+        } else {
+          console.log(requestData);
+          console.error("Error scraping website");
+          setTitle("");
+          setArticle("");
+          setShowErrorModal(true);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setTitle("Error");
+        setArticle("Error");
+      } finally {
+        setLoading(false);
       }
     } else {
       console.error("Selected NewsSite or URL is missing.");
     }
   };
+  
 
   const handleDetectClick = async () => {
     const siteName = extractSiteNameFromUrl(url);
