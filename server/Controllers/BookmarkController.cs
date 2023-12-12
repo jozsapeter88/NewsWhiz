@@ -27,20 +27,17 @@ namespace server.Controllers
         public async Task<IActionResult> SaveBookmark([FromBody] BookmarkRequest request)
         {
             var user = await _userManager.GetUserAsync(User);
-
-            if (request == null || string.IsNullOrWhiteSpace(request.Name) || string.IsNullOrWhiteSpace(request.Text) ||
-                user == null)
+            if (user == null)
             {
-                return BadRequest("Invalid bookmark data");
+                return NotFound();
             }
-
+            
             try
             {
                 // Decompress the received compressed text data
                 var decompressedText = Decompress(request.Text);
 
-                // Continue with the rest of your code...
-                var bookmarkId = await _bookmarkService.SaveBookmarkAsync(request.Name, decompressedText, request.UserId);
+                var bookmarkId = await _bookmarkService.SaveBookmarkAsync(request.Name, decompressedText, user.Id);
 
                 return Ok(new { BookmarkId = bookmarkId });
             }

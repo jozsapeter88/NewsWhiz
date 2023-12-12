@@ -33,7 +33,12 @@ builder.Services.AddIdentity<User, IdentityRole>()
 builder.Services.AddTransient<INewsSiteService, NewsSiteService>();
 builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<IBookmarkService, BookmarkService>();
-
+builder.Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
+        options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
+    })
+    .AddIdentityCookies();
 
 var app = builder.Build();
 
@@ -76,6 +81,7 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+app.UseAuthentication();
 app.UseAuthentication();
 app.UseCors();
 app.MapControllers();

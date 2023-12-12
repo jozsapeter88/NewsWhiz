@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Accordion, Card, Modal, Button } from "react-bootstrap";
-import { BsBookmarkStarFill  } from "react-icons/bs";
+import { BsBookmarkStarFill } from "react-icons/bs";
 import "./MainPage.css";
 import SentimentBar from "../../Components/SentimentBar";
 import TopNavbar from "../../Components/TopNavbar";
@@ -9,7 +9,7 @@ import SummaryComponent from "../../Components/SummaryGeneration";
 import CustomSpinner from "../../Components/CustomSpinner";
 import { useDarkMode } from "../../Contexts/DarkModeContext";
 import { useAuth } from "../../Contexts/AuthContext";
-import pako from 'pako';
+import pako from "pako";
 
 function MainPage() {
   const [newsSites, setNewsSites] = useState([]);
@@ -76,20 +76,19 @@ function MainPage() {
     }
   };
 
-
   const handleScrapeClick = async () => {
     if (selectedSite && url) {
       setLoading(true);
-  
+
       try {
         const requestData = {
           selectedSite: selectedSite.name,
           url: url,
         };
-  
+
         // Compress the 'text' property using pako
-        requestData.text = btoa(pako.deflate(article, { to: 'string' }));
-  
+        requestData.text = btoa(pako.deflate(article, { to: "string" }));
+
         const response = await fetch(
           "http://localhost:5092/api/NewsSite/scrape",
           {
@@ -100,10 +99,10 @@ function MainPage() {
             body: JSON.stringify(requestData),
           }
         );
-  
+
         if (response.ok) {
           const data = await response.json();
-  
+
           // Check if the content is empty or not suitable for summarization
           if (!data || !data.title || !data.article) {
             console.error("Empty or invalid content");
@@ -112,14 +111,14 @@ function MainPage() {
             setShowErrorModal(true);
             return;
           }
-  
+
           setTitle(data.title);
           setArticle(data.article);
           await summarizeText();
-  
+
           // Detect language
           await detectLanguage();
-  
+
           // Analyze sentiment
           await analyzeSentiment();
         } else {
@@ -140,7 +139,6 @@ function MainPage() {
       console.error("Selected NewsSite or URL is missing.");
     }
   };
-  
 
   const handleDetectClick = async () => {
     const siteName = extractSiteNameFromUrl(url);
@@ -294,13 +292,13 @@ function MainPage() {
   };
 
   const handleSaveBookmark = async () => {
-    const loggedInUser = user && user.id;
-  
+    const loggedInUser = user.id;
+
     if (!loggedInUser) {
       alert("User not logged in");
       return;
     }
-  
+
     try {
       const response = await fetch("http://localhost:5092/api/Bookmark", {
         method: "POST",
@@ -313,7 +311,7 @@ function MainPage() {
           userId: loggedInUser,
         }),
       });
-  
+
       if (response.ok) {
         alert("Bookmark saved!");
         setShowModal(false);
