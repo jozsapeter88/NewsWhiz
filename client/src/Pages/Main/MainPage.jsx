@@ -9,6 +9,7 @@ import SummaryComponent from "../../Components/SummaryGeneration";
 import CustomSpinner from "../../Components/CustomSpinner";
 import { useDarkMode } from "../../Contexts/DarkModeContext";
 import { useAuth } from "../../Contexts/AuthContext";
+import pako from 'pako';
 
 function MainPage() {
   const [newsSites, setNewsSites] = useState([]);
@@ -75,17 +76,21 @@ function MainPage() {
     }
   };
 
+
   const handleScrapeClick = async () => {
     if (selectedSite && url) {
       setLoading(true);
-
+  
       const scrapeProcess = async () => {
         const requestData = {
           selectedSite: selectedSite.name,
           url: url,
         };
-
+  
         try {
+          // Compress the 'text' property using pako
+          requestData.text = btoa(pako.deflate(article, { to: 'string' }));
+  
           const response = await fetch(
             "http://localhost:5092/api/NewsSite/scrape",
             {
@@ -96,10 +101,10 @@ function MainPage() {
               body: JSON.stringify(requestData),
             }
           );
-
+  
           if (response.ok) {
             const data = await response.json();
-
+  
             // Check if the content is empty or not suitable for summarization
             if (!data || !data.title || !data.article) {
               console.error("Empty or invalid content");
@@ -108,14 +113,14 @@ function MainPage() {
               setShowErrorModal(true);
               return;
             }
-
+  
             setTitle(data.title);
             setArticle(data.article);
             await summarizeText();
-
+  
             // Detect language
             await detectLanguage();
-
+  
             // Analyze sentiment
             await analyzeSentiment();
           } else {
@@ -133,7 +138,7 @@ function MainPage() {
           setLoading(false);
         }
       };
-
+  
       // Execute scrapeProcess 3 times with a 5-second delay between each execution
       for (let i = 0; i < 3; i++) {
         await scrapeProcess();
@@ -300,8 +305,7 @@ function MainPage() {
     const loggedInUser = user && user.id;
   
     if (!loggedInUser) {
-      console.error("User not logged in.");
-      // You may want to handle this case, e.g., redirect to login page.
+      alert("User not logged in");
       return;
     }
   
@@ -313,7 +317,7 @@ function MainPage() {
         },
         body: JSON.stringify({
           name: bookmarkName,
-          text: cleanedArticle,
+          text: "test",
           userId: loggedInUser,
         }),
       });
@@ -323,9 +327,6 @@ function MainPage() {
         setShowModal(false);
       } else {
         console.error("Error saving bookmark");
-        console.log(bookmarkName)
-        console.log(cleanedArticle)
-        console.log(loggedInUser)
       }
     } catch (error) {
       console.error("Error saving bookmark:", error);

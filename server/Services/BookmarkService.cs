@@ -23,7 +23,6 @@ public class BookmarkService : IBookmarkService
 
     public async Task<IEnumerable<Bookmark>> GetBookmarksAsync(string userId)
     {
-        // Retrieve bookmarks associated with the user's ID
         return await _dbContext.Bookmarks.Where(b => b.UserId == userId).ToListAsync();
     }
 }
