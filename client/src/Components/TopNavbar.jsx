@@ -37,7 +37,7 @@ function TopNavbar() {
       <Container>
         <Navbar.Brand href="/">
           <img
-            src="assets/images/nav.png"
+            src={`${process.env.PUBLIC_URL}/assets/images/nav.png`}
             alt="logo"
             style={{ height: "100px", width: "200px" }}
           />
@@ -92,9 +92,9 @@ function TopNavbar() {
                 id="dropdown-menu-align-right"
                 variant={isDarkMode ? "dark" : "light"}
               >
-                <Dropdown.Item 
-                onClick={handleShowLogoutModal}
-                variant={isDarkMode ? "dark" : "light"}
+                <Dropdown.Item
+                  onClick={handleShowLogoutModal}
+                  variant={isDarkMode ? "dark" : "light"}
                 >
                   Logout
                 </Dropdown.Item>

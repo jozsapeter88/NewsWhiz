@@ -59,6 +59,7 @@ function BookmarkPage() {
               <Card.Title className="bookmark-title">
                 {bookmark.name}
               </Card.Title>
+              <Card.Text>{bookmark.title}</Card.Text>
               <Card.Text className="bookmark-text">
                 {truncateText(bookmark.text, 50)}
               </Card.Text>

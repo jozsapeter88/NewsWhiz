@@ -49,6 +49,8 @@
     font-size: 1rem;
     max-height: 3.6em;
     overflow: hidden;
+    font-style: italic;
+    font-size: 13px;
   }
   
   .link-button {

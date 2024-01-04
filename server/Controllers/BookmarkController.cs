@@ -57,7 +57,7 @@ namespace server.Controllers
 
             try
             {
-                var bookmarkId = _bookmarkService.SaveBookmarkAsync(request.Name, request.Text, request.UserId);
+                var bookmarkId = _bookmarkService.SaveBookmarkAsync(request.Name, request.Text, request.Title, request.UserId);
 
                 return Ok(new { BookmarkId = bookmarkId });
             }

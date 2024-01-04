@@ -13,9 +13,9 @@ public class BookmarkService : IBookmarkService
         _dbContext = dbContext;
     }
 
-    public async Task<int> SaveBookmarkAsync(string name, string text, string userId)
+    public async Task<int> SaveBookmarkAsync(string name, string text, string title, string userId)
     {
-        var bookmark = new Bookmark { Name = name, Text = text, UserId = userId };
+        var bookmark = new Bookmark { Name = name, Text = text, Title = title, UserId = userId };
         _dbContext.Bookmarks.Add(bookmark);
         await _dbContext.SaveChangesAsync();
         return bookmark.Id;

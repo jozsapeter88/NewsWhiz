@@ -103,7 +103,6 @@ function MainPage() {
         if (response.ok) {
           const data = await response.json();
 
-          // Check if the content is empty or not suitable for summarization
           if (!data || !data.title || !data.article) {
             console.error("Empty or invalid content");
             setTitle("");
@@ -308,6 +307,7 @@ function MainPage() {
         body: JSON.stringify({
           name: bookmarkName,
           text: cleanedArticle,
+          title: title,
           userId: loggedInUser,
         }),
       });

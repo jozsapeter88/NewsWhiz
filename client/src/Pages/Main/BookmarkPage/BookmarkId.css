@@ -2,3 +2,24 @@
   padding-left: 20vh;
   padding-right: 20vh;
 }
+
+.textTitle {
+  padding-left: 20vh;
+  padding-right: 20vh;
+}
+
+.textHeader {
+  display: flex;
+  align-items: flex-start;
+  margin-left: 20vh;
+  margin-bottom: 2vh;
+}
+
+.bookmarkName {
+  margin-left: 2vh;
+}
+
+.page-container {
+  position: relative;
+}
+
