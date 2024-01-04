@@ -25,4 +25,9 @@ public class BookmarkService : IBookmarkService
     {
         return await _dbContext.Bookmarks.Where(b => b.UserId == userId).ToListAsync();
     }
+    
+    public async Task<Bookmark> GetBookmarkByIdAsync(int id)
+    {
+        return await _dbContext.Bookmarks.FindAsync(id);
+    }
 }

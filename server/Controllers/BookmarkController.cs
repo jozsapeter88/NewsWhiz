@@ -22,7 +22,34 @@ namespace server.Controllers
             _bookmarkService = bookmarkService;
             _userManager = userManager;
         }
+        
+        [HttpGet("GetBookmarks/{userId}")]
+        public async Task<ActionResult<IEnumerable<Bookmark>>> GetBookmarksAsync(string userId)
+        {
+            try
+            {
+                var bookmarks = await _bookmarkService.GetBookmarksAsync(userId);
+                return Ok(bookmarks);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal Server Error: {ex.Message}");
+            }
+        }
+        
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Bookmark>> GetBookmarkById(int id)
+        {
+            var bookmark = await _bookmarkService.GetBookmarkByIdAsync(id);
 
+            if (bookmark == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(bookmark);
+        }
+        
         [HttpPost]
         public IActionResult SaveBookmark([FromBody] BookmarkRequest request)
         {
@@ -30,7 +57,7 @@ namespace server.Controllers
 
             try
             {
-                var bookmarkId = _bookmarkService.SaveBookmarkAsync(request.Name, request.Text, user.Id);
+                var bookmarkId = _bookmarkService.SaveBookmarkAsync(request.Name, request.Text, request.UserId);
 
                 return Ok(new { BookmarkId = bookmarkId });
             }
