@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Dropdown } from "react-bootstrap";
+import { Dropdown, Form } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import TopNavbar from "../../../Components/TopNavbar";
 import { useDarkMode } from "../../../Contexts/DarkModeContext";
@@ -15,6 +15,7 @@ function BookmarkId() {
   const { isDarkMode } = useDarkMode();
 
   const [summaryResult, setSummaryResult] = useState(null);
+  const [summaryPercent, setSummaryPercent] = useState(10);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -46,10 +47,8 @@ function BookmarkId() {
 
   const handleDropdownSelection = async () => {
     if (!summaryResult) {
-      // If summaryResult is null, perform summarization
       await handleSummarization();
     } else {
-      // If summaryResult is available, set it to null to show the original text
       setSummaryResult(null);
     }
   };
@@ -66,7 +65,7 @@ function BookmarkId() {
       },
       body: JSON.stringify({
         language: "english",
-        summary_percent: 10,
+        summary_percent: summaryPercent,
         text: bookmark.text,
       }),
     };
@@ -74,9 +73,6 @@ function BookmarkId() {
     try {
       const response = await fetch(url, options);
       const result = await response.json();
-
-      console.log("Summarization Request:", options);
-      console.log("Summarization Result:", result);
 
       if (result.ok) {
         setSummaryResult(result.summary);
@@ -86,6 +82,11 @@ function BookmarkId() {
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const handleSliderChange = (event) => {
+    setSummaryPercent(parseInt(event.target.value, 10));
+    handleSummarization();
   };
 
   return (
@@ -116,11 +117,28 @@ function BookmarkId() {
         </div>
       </div>
       <div className={`page-container ${isDarkMode ? "dark-mode" : ""}`}>
+        {/* Slider for summary percentage */}
+        {summaryResult && (
+          <Form className="summary-slider">
+            <Form.Label>Summary Percentage: {summaryPercent}%</Form.Label>
+            <Form.Range
+              value={summaryPercent}
+              onChange={handleSliderChange}
+              min={0}
+              max={100}
+            />
+          </Form>
+        )}
         <div>
-          <h2 className="textTitle">{bookmark ? <p>{bookmark.title}</p> : <p>Loading...</p>}
-</h2>
+          <h2 className="textTitle">
+            {bookmark ? <p>{bookmark.title}</p> : <p>Loading...</p>}
+          </h2>
           <div className="textBody">
-            {summaryResult !== null ? <p>{summaryResult}</p> :  <p>{bookmark.text}</p>}
+            {summaryResult !== null ? (
+              <p>{summaryResult}</p>
+            ) : (
+              <p>{bookmark.text}</p>
+            )}
           </div>
         </div>
       </div>

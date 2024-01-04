@@ -23,3 +23,11 @@
   position: relative;
 }
 
+.summary-slider {
+  padding-left: 20vh;
+  padding-right: 20vh;
+}
+
+body.dark-mode .form-range {
+  background-color: transparent;
+}
