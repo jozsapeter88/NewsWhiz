@@ -1,5 +1,3 @@
-// TopNavbar.js
-
 import React, { useState } from "react";
 import Navbar from "react-bootstrap/Navbar";
 import Container from "react-bootstrap/Container";
@@ -39,13 +37,24 @@ function TopNavbar() {
       <Container>
         <Navbar.Brand href="/">
           <img
-            src="assets/images/nav.png"
+            src={`${process.env.PUBLIC_URL}/assets/images/nav.png`}
             alt="logo"
             style={{ height: "100px", width: "200px" }}
           />
         </Navbar.Brand>
         <Navbar.Toggle />
         <Navbar.Collapse className="justify-content-end">
+          {user ? (
+            <>
+              <Navbar.Text>
+                <Link to="/bookmarks" className="nav-link bookmarkBtn">
+                  Bookmarks
+                </Link>
+              </Navbar.Text>
+            </>
+          ) : (
+            <Navbar.Text></Navbar.Text>
+          )}
           <Navbar.Text>
             <MdOutlineLightMode />
           </Navbar.Text>
@@ -72,20 +81,25 @@ function TopNavbar() {
             <MdOutlineDarkMode />
           </Navbar.Text>
           {user ? (
-            <DropdownButton
-              title={
-                <span>
-                  Logged in as{" "}
-                  <strong style={{ color: "blue" }}>{user.userName}</strong>
-                </span>
-              }
-              id="dropdown-menu-align-right"
-              variant={isDarkMode ? "dark" : "light"}
-            >
-              <Dropdown.Item onClick={handleShowLogoutModal}>
-                Logout
-              </Dropdown.Item>
-            </DropdownButton>
+            <>
+              <DropdownButton
+                title={
+                  <span>
+                    Logged in as{" "}
+                    <strong style={{ color: "blue" }}>{user.userName}</strong>
+                  </span>
+                }
+                id="dropdown-menu-align-right"
+                variant={isDarkMode ? "dark" : "light"}
+              >
+                <Dropdown.Item
+                  onClick={handleShowLogoutModal}
+                  variant={isDarkMode ? "dark" : "light"}
+                >
+                  Logout
+                </Dropdown.Item>
+              </DropdownButton>
+            </>
           ) : (
             <Navbar.Text className="loginBtn">
               <Link to="/login" className="nav-link">

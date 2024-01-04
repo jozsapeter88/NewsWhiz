@@ -1,0 +1,59 @@
+:root {
+    --background-light: #ffffff;
+    --background-dark: #474747;
+    --text-light: #333333;
+    --text-dark: #ffffff;
+    --border-light: #dddddd;
+    --border-dark: #333333;
+  }
+  
+  body {
+    background-color: var(--background-light);
+    color: var(--text-light);
+    border-color: var(--border-light);
+    transition: background-color 0.3s, color 0.3s;
+  }
+  
+  body.dark-mode {
+    background-color: var(--background-dark);
+    color: var(--text-dark);
+    border-color: var(--border-dark);
+  }
+  
+  /* Add dark mode styles specific to BookmarkPage */
+  body.dark-mode .card {
+    background-color: #3330306c;
+    color: white;
+  }
+  
+  /* Add more dark mode styles as needed */
+  
+
+.bookmark-container {
+    display: flex;
+    flex-wrap: wrap;
+    padding-left: 20vh;
+    padding-right: 20vh;
+  }
+  
+  .bookmark-card {
+    width: 18rem;
+    margin: 10px;
+  }
+  
+  .bookmark-title {
+    font-size: 1.5rem;
+  }
+  
+  .bookmark-text {
+    font-size: 1rem;
+    max-height: 3.6em;
+    overflow: hidden;
+    font-style: italic;
+    font-size: 13px;
+  }
+  
+  .link-button {
+    text-decoration: none;
+  }
+  

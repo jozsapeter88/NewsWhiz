@@ -17,7 +17,6 @@ builder.Services.AddCors(options =>
                 .AllowAnyMethod()
                 .AllowCredentials();
         });
-
 });
 
 builder.Services.AddControllers();
@@ -27,18 +26,20 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-builder.Services.AddIdentity<User, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = false)
-    .AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddIdentity<User, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
 
 builder.Services.AddTransient<INewsSiteService, NewsSiteService>();
 builder.Services.AddTransient<IUserService, UserService>();
+builder.Services.AddTransient<IBookmarkService, BookmarkService>();
 
 var app = builder.Build();
 
 using (var serviceScope = app.Services.CreateScope())
 {
     var context = serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    
+
     try
     {
         DataSeed.Initialize(context);
@@ -47,7 +48,6 @@ using (var serviceScope = app.Services.CreateScope())
     {
         Console.WriteLine($"Error during database seeding: {ex.Message}");
     }
-
 }
 
 //Add adminUser
@@ -59,6 +59,7 @@ using (var scope = app.Services.CreateScope())
         var adminRole = new IdentityRole("Admin");
         await roleManager.CreateAsync(adminRole);
     }
+
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
     var adminUser = new User
     {
@@ -74,6 +75,7 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
+app.UseAuthentication();
 app.UseCors();
 app.MapControllers();
 app.Run();

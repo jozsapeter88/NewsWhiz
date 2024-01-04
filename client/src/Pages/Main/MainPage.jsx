@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Accordion, Card, Modal, Button } from "react-bootstrap";
-import { BsBookmarkStarFill  } from "react-icons/bs";
+import { BsBookmarkStarFill } from "react-icons/bs";
 import "./MainPage.css";
 import SentimentBar from "../../Components/SentimentBar";
 import TopNavbar from "../../Components/TopNavbar";
@@ -8,6 +8,8 @@ import KeywordComponent from "../../Components/KeywordComponent";
 import SummaryComponent from "../../Components/SummaryGeneration";
 import CustomSpinner from "../../Components/CustomSpinner";
 import { useDarkMode } from "../../Contexts/DarkModeContext";
+import { useAuth } from "../../Contexts/AuthContext";
+import pako from "pako";
 
 function MainPage() {
   const [newsSites, setNewsSites] = useState([]);
@@ -25,7 +27,10 @@ function MainPage() {
   const [scrapeButtonDisabled, setScrapeButtonDisabled] = useState(true);
   const [activeAccordion, setActiveAccordion] = useState(null);
   const [showFullContent, setShowFullContent] = useState(false);
+  const [bookmarkName, setBookmarkName] = useState("");
+  const [showModal, setShowModal] = useState(false);
   const { isDarkMode } = useDarkMode();
+  const { user } = useAuth();
 
   useEffect(() => {
     if (isDarkMode) {
@@ -75,66 +80,59 @@ function MainPage() {
     if (selectedSite && url) {
       setLoading(true);
 
-      const scrapeProcess = async () => {
+      try {
         const requestData = {
           selectedSite: selectedSite.name,
           url: url,
         };
 
-        try {
-          const response = await fetch(
-            "http://localhost:5092/api/NewsSite/scrape",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(requestData),
-            }
-          );
+        // Compress the 'text' property using pako
+        requestData.text = btoa(pako.deflate(article, { to: "string" }));
 
-          if (response.ok) {
-            const data = await response.json();
+        const response = await fetch(
+          "http://localhost:5092/api/NewsSite/scrape",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestData),
+          }
+        );
 
-            // Check if the content is empty or not suitable for summarization
-            if (!data || !data.title || !data.article) {
-              console.error("Empty or invalid content");
-              setTitle("");
-              setArticle("");
-              setShowErrorModal(true);
-              return;
-            }
+        if (response.ok) {
+          const data = await response.json();
 
-            setTitle(data.title);
-            setArticle(data.article);
-            await summarizeText();
-
-            // Detect language
-            await detectLanguage();
-
-            // Analyze sentiment
-            await analyzeSentiment();
-          } else {
-            console.log(requestData);
-            console.error("Error scraping website");
+          if (!data || !data.title || !data.article) {
+            console.error("Empty or invalid content");
             setTitle("");
             setArticle("");
             setShowErrorModal(true);
+            return;
           }
-        } catch (error) {
-          console.error("Error fetching data:", error);
-          setTitle("Error");
-          setArticle("Error");
-        } finally {
-          setLoading(false);
-        }
-      };
 
-      // Execute scrapeProcess 3 times with a 5-second delay between each execution
-      for (let i = 0; i < 3; i++) {
-        await scrapeProcess();
-        // Delay for 5 seconds
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+          setTitle(data.title);
+          setArticle(data.article);
+          await summarizeText();
+
+          // Detect language
+          await detectLanguage();
+
+          // Analyze sentiment
+          await analyzeSentiment();
+        } else {
+          console.log(requestData);
+          console.error("Error scraping website");
+          setTitle("");
+          setArticle("");
+          setShowErrorModal(true);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setTitle("Error");
+        setArticle("Error");
+      } finally {
+        setLoading(false);
       }
     } else {
       console.error("Selected NewsSite or URL is missing.");
@@ -289,28 +287,39 @@ function MainPage() {
   };
 
   const handleBookmarkClick = async () => {
-    if (summaryResult) {
-      try {
-        const response = await fetch("http://localhost:5092/api/Bookmark", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            text: summaryResult,
-          }),
-        });
-  
-        if (response.ok) {
-          alert("Bookmark saved!");
-        } else {
-          console.error("Error saving bookmark");
-        }
-      } catch (error) {
-        console.error("Error saving bookmark:", error);
+    setShowModal(true);
+  };
+
+  const handleSaveBookmark = async () => {
+    const loggedInUser = user.id;
+
+    if (!loggedInUser) {
+      alert("User not logged in");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://localhost:5092/api/Bookmark", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: bookmarkName,
+          text: cleanedArticle,
+          title: title,
+          userId: loggedInUser,
+        }),
+      });
+
+      if (response.ok) {
+        alert("Bookmark saved!");
+        setShowModal(false);
+      } else {
+        console.error("Error saving bookmark");
       }
-    } else {
-      alert("No text to bookmark");
+    } catch (error) {
+      console.error("Error saving bookmark:", error);
     }
   };
 
@@ -353,8 +362,9 @@ function MainPage() {
               </div>
             )}
           </Card>
-          <Button variant="warning" onClick={handleBookmarkClick}><BsBookmarkStarFill/></Button>
-
+          <Button variant="warning" onClick={handleBookmarkClick}>
+            <BsBookmarkStarFill />
+          </Button>
         </div>
         <div>
           {loading && <CustomSpinner />}
@@ -371,12 +381,11 @@ function MainPage() {
                 {showFullContent
                   ? cleanedArticle
                   : `${cleanedArticle.slice(0, 1200)}...`}
-              </p> 
+              </p>
               {cleanedArticle.length > 1200 && (
                 <button onClick={() => setShowFullContent(!showFullContent)}>
                   {showFullContent ? "View less" : "View more..."}
                 </button>
-                
               )}
             </Card>
           )}
@@ -408,6 +417,29 @@ function MainPage() {
           <Modal.Footer>
             <Button variant="primary" onClick={handleCloseErrorModal}>
               Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+        {/* Modal for entering bookmark name */}
+        <Modal show={showModal} onHide={() => setShowModal(false)}>
+          <Modal.Header closeButton>
+            <Modal.Title>Enter Bookmark Name</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <input
+              type="text"
+              value={bookmarkName}
+              onChange={(e) => setBookmarkName(e.target.value)}
+              placeholder="Enter bookmark name"
+            />
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowModal(false)}>
+              Close
+            </Button>
+            <Button variant="primary" onClick={handleSaveBookmark}>
+              Save Bookmark
             </Button>
           </Modal.Footer>
         </Modal>
