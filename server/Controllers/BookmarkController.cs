@@ -24,48 +24,20 @@ namespace server.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SaveBookmark([FromBody] BookmarkRequest request)
+        public IActionResult SaveBookmark([FromBody] BookmarkRequest request)
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return NotFound();
-            }
-            
+            var user = _userManager.GetUserAsync(User).Result;
+
             try
             {
-                // Decompress the received compressed text data
-                var decompressedText = Decompress(request.Text);
-
-                var bookmarkId = await _bookmarkService.SaveBookmarkAsync(request.Name, decompressedText, user.Id);
+                var bookmarkId = _bookmarkService.SaveBookmarkAsync(request.Name, request.Text, user.Id);
 
                 return Ok(new { BookmarkId = bookmarkId });
             }
-            catch (FormatException ex)
-            {
-                Console.Error.WriteLine($"Error decoding Base64 data: {ex.Message}");
-                return BadRequest("Invalid Base64 format");
-            }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"Error decompressing data: {ex.Message}");
+                Console.Error.WriteLine($"Error saving bookmark: {ex.Message}");
                 return StatusCode(500, "Internal Server Error");
-            }
-        }
-
-        private string Decompress(string compressedText)
-        {
-            var compressedBytes = Convert.FromBase64String(compressedText);
-
-            using (var compressedStream = new MemoryStream(compressedBytes))
-            using (var decompressedStream = new MemoryStream())
-            {
-                using (var deflateStream = new DeflateStream(compressedStream, CompressionMode.Decompress))
-                {
-                    deflateStream.CopyTo(decompressedStream);
-                }
-
-                return Encoding.UTF8.GetString(decompressedStream.ToArray());
             }
         }
     }
