@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import TopNavbar from "../../../Components/TopNavbar";
 import { useDarkMode } from "../../../Contexts/DarkModeContext";
+import "./BookmarkId.css";
 
 function BookmarkId() {
   const { id } = useParams();
@@ -41,7 +42,7 @@ function BookmarkId() {
       {bookmark && (
         <div>
           <h2>{bookmark.name}</h2>
-          <p>{bookmark.text}</p>
+          <div className="textBody">{bookmark.text}</div>
         </div>
       )}
     </div>
