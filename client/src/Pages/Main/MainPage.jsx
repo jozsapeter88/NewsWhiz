@@ -307,7 +307,7 @@ function MainPage() {
         },
         body: JSON.stringify({
           name: bookmarkName,
-          text: "test",
+          text: cleanedArticle,
           userId: loggedInUser,
         }),
       });

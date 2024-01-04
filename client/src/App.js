@@ -7,6 +7,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import LoginPage from "./Pages/Main/LoginPage/LoginPage";
 import RegistrationForm from "./Pages/Main/RegisterPage/RegisterPage";
 import { DarkModeProvider } from "./Contexts/DarkModeContext";
+import BookmarkPage from "./Pages/Main/BookmarkPage/BookmarkPage";
 
 function App() {
   const { user, login } = useAuth();
@@ -29,6 +30,7 @@ function App() {
           <Route path="/" element={<MainPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegistrationForm />} />
+          <Route path="/bookmarks" element={<BookmarkPage />} />
         </Routes>
       </DarkModeProvider>
     </div>
