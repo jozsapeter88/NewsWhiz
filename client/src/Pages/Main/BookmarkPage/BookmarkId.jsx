@@ -117,9 +117,10 @@ function BookmarkId() {
       </div>
       <div className={`page-container ${isDarkMode ? "dark-mode" : ""}`}>
         <div>
-          <h2 className="textTitle">{bookmark.title}</h2>
+          <h2 className="textTitle">{bookmark ? <p>{bookmark.title}</p> : <p>Loading...</p>}
+</h2>
           <div className="textBody">
-            {summaryResult !== null ? summaryResult : bookmark.text}
+            {summaryResult !== null ? <p>{summaryResult}</p> :  <p>{bookmark.text}</p>}
           </div>
         </div>
       </div>
