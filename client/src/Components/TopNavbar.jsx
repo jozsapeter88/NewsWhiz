@@ -92,7 +92,10 @@ function TopNavbar() {
                 id="dropdown-menu-align-right"
                 variant={isDarkMode ? "dark" : "light"}
               >
-                <Dropdown.Item onClick={handleShowLogoutModal}>
+                <Dropdown.Item 
+                onClick={handleShowLogoutModal}
+                variant={isDarkMode ? "dark" : "light"}
+                >
                   Logout
                 </Dropdown.Item>
               </DropdownButton>
