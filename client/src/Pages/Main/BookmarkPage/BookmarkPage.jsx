@@ -74,10 +74,11 @@ function BookmarkPage() {
       <div className="bookmark-container">
         {bookmarks.map((bookmark) => (
           <Card key={bookmark.id} className="bookmark-card position-relative">
-            <IoCloseCircle size={30} 
-            className="closeBtn" 
-            style={{cursor: 'pointer' }}
-            onClick={() => handleShowModal(bookmark)}
+            <IoCloseCircle
+              size={30}
+              className="closeBtn"
+              style={{ cursor: "pointer" }}
+              onClick={() => handleShowModal(bookmark)}
             />
             <Card.Body>
               <Card.Title className="bookmark-title">
@@ -95,29 +96,26 @@ function BookmarkPage() {
         ))}
       </div>
 
-{/* Confirmation Modal */}
-<Modal 
-  show={showConfirmationModal} 
-  onHide={handleCloseModal}
-  className={isDarkMode ? 'dark-mode' : ''}
-
-  data-bs-modal={isDarkMode ? 'dark' : ''}
->
-  <Modal.Header closeButton>
-    <Modal.Title>Confirm Deletion</Modal.Title>
-  </Modal.Header>
-  <Modal.Body>
-    Are you sure you want to delete the bookmark?
-  </Modal.Body>
-  <Modal.Footer>
-    <Button variant="secondary" onClick={handleCloseModal}>
-      Cancel
-    </Button>
-    <Button variant="danger" onClick={handleDeleteBookmark}>
-      Delete
-    </Button>
-  </Modal.Footer>
-</Modal>
+      {/* Confirmation Modal */}
+      <Modal
+        show={showConfirmationModal}
+        onHide={handleCloseModal}
+        className={isDarkMode ? "dark-mode" : ""}
+        data-bs-modal={isDarkMode ? "dark" : ""}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Deletion</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Are you sure you want to delete the bookmark?</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseModal}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={handleDeleteBookmark}>
+            Delete
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 }

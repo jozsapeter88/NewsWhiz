@@ -17,6 +17,9 @@ function BookmarkId() {
   const [summaryResult, setSummaryResult] = useState(null);
   const [summaryPercent, setSummaryPercent] = useState(10);
 
+  const [loading, setLoading] = useState(true); // New loading state
+
+
   useEffect(() => {
     if (isDarkMode) {
       document.body.classList.add("dark-mode");
@@ -39,6 +42,8 @@ function BookmarkId() {
         }
       } catch (error) {
         console.error("Error fetching bookmark:", error);
+      } finally {
+        setLoading(false)
       }
     };
 
@@ -117,6 +122,10 @@ function BookmarkId() {
         </div>
       </div>
       <div className={`page-container ${isDarkMode ? "dark-mode" : ""}`}>
+      {loading ? (
+          <p>Loading...</p>
+        ) : (
+          <>
         {/* Slider for summary percentage */}
         {summaryResult && (
           <Form className="summary-slider">
@@ -141,6 +150,8 @@ function BookmarkId() {
             )}
           </div>
         </div>
+        </>
+        )}
       </div>
     </>
   );

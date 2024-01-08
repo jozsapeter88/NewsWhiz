@@ -78,7 +78,9 @@ function MainPage() {
           url: url,
         };
 
-        // Compress the 'text' property using pako
+        //  the entire line takes the article text, compresses it using the DEFLATE algorithm, 
+        // and then encodes the compressed result in Base64. 
+        // The resulting Base64 string is assigned to the text property of the requestData object. 
         requestData.text = btoa(pako.deflate(article, { to: "string" }));
 
         const response = await fetch(
