@@ -22,10 +22,10 @@ body.dark-mode {
 }
 
 body.dark-mode input {
-  background-color:  rgb(194, 194, 194);
+  background-color: rgb(194, 194, 194);
 }
 
-body.dark-mode .accordion-content{
+body.dark-mode .accordion-content {
   background-color: #3330306c;
   color: white;
   border-color: rgb(48, 48, 48);
@@ -47,6 +47,10 @@ body.dark-mode .accordion-content{
 
 .form-group {
   margin-bottom: 10px;
+}
+
+.bookmarkBtn {
+  margin-left: 1vh;
 }
 
 .select-site {
@@ -135,6 +139,18 @@ body.dark-mode .card {
   text-align: left;
   margin: 0 auto;
   margin-bottom: 20px;
+}
+
+.flex-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+}
+
+.flex-container.collapsed {
+  height: 5vh;
+  overflow: hidden;
 }
 
 .loading-spinner-container {

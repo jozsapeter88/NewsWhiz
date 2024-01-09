@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Accordion, Card, Modal, Button } from "react-bootstrap";
+import { Form, Card, Modal, Button } from "react-bootstrap";
 import { BsBookmarkStarFill } from "react-icons/bs";
 import "./MainPage.css";
 import SentimentBar from "../../Components/SentimentBar";
 import TopNavbar from "../../Components/TopNavbar";
-import KeywordComponent from "../../Components/KeywordComponent";
-import SummaryComponent from "../../Components/SummaryGeneration";
 import CustomSpinner from "../../Components/CustomSpinner";
 import { useDarkMode } from "../../Contexts/DarkModeContext";
 import { useAuth } from "../../Contexts/AuthContext";
@@ -19,13 +17,7 @@ function MainPage() {
   const [article, setArticle] = useState("");
   const [loading, setLoading] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
-  const [generatedKeywords, setGeneratedKeywords] = useState([]);
-  const [languageDetectionResult, setLanguageDetectionResult] = useState(null);
-  const [summaryResult, setSummaryResult] = useState("");
-  const [sentimentAnalysisResult, setSentimentAnalysisResult] = useState("");
-  const [aggregateSentiment, setAggregateSentiment] = useState(null);
   const [scrapeButtonDisabled, setScrapeButtonDisabled] = useState(true);
-  const [activeAccordion, setActiveAccordion] = useState(null);
   const [showFullContent, setShowFullContent] = useState(false);
   const [bookmarkName, setBookmarkName] = useState("");
   const [showModal, setShowModal] = useState(false);
@@ -86,7 +78,9 @@ function MainPage() {
           url: url,
         };
 
-        // Compress the 'text' property using pako
+        //  the entire line takes the article text, compresses it using the DEFLATE algorithm, 
+        // and then encodes the compressed result in Base64. 
+        // The resulting Base64 string is assigned to the text property of the requestData object. 
         requestData.text = btoa(pako.deflate(article, { to: "string" }));
 
         const response = await fetch(
@@ -113,13 +107,6 @@ function MainPage() {
 
           setTitle(data.title);
           setArticle(data.article);
-          await summarizeText();
-
-          // Detect language
-          await detectLanguage();
-
-          // Analyze sentiment
-          await analyzeSentiment();
         } else {
           console.log(requestData);
           console.error("Error scraping website");
@@ -171,121 +158,6 @@ function MainPage() {
 
   const cleanedArticle = article.replace(/\s+/g, " ").trim();
 
-  const summarizeText = async () => {
-    console.log("Cleaned Article:", cleanedArticle);
-
-    const url =
-      "https://text-analysis12.p.rapidapi.com/summarize-text/api/v1.1";
-    const options = {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "X-RapidAPI-Key": "21ab335ba4msh85f8c88bb6ae3f6p14ac31jsn78a47852eb0d",
-        "X-RapidAPI-Host": "text-analysis12.p.rapidapi.com",
-      },
-      body: JSON.stringify({
-        language: "english",
-        summary_percent: 10,
-        text: cleanedArticle,
-      }),
-    };
-
-    try {
-      const response = await fetch(url, options);
-      const result = await response.json();
-
-      console.log("Summarization Request:", options);
-      console.log("Summarization Result:", result);
-
-      if (result.ok) {
-        setSummaryResult(result.summary);
-      } else {
-        console.error("Error in summarization:", result.msg);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const detectLanguage = async () => {
-    const url = "https://microsoft-text-analytics1.p.rapidapi.com/languages";
-    const options = {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "X-RapidAPI-Key": "21ab335ba4msh85f8c88bb6ae3f6p14ac31jsn78a47852eb0d",
-        "X-RapidAPI-Host": "microsoft-text-analytics1.p.rapidapi.com",
-      },
-      body: JSON.stringify({
-        documents: [
-          {
-            countryHint: "US",
-            id: "1",
-            text: summaryResult,
-          },
-        ],
-      }),
-    };
-
-    try {
-      const response = await fetch(url, options);
-      const result = await response.json();
-
-      if (result.documents && result.documents.length > 0) {
-        const detectedLanguage = result.documents[0].detectedLanguage;
-
-        if (detectedLanguage) {
-          const languageName = detectedLanguage.name;
-          console.log(languageName);
-          setLanguageDetectionResult(languageName);
-        } else {
-          console.error("No detected language found in the response");
-        }
-      } else {
-        console.error("Invalid response format");
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const analyzeSentiment = async () => {
-    const url =
-      "https://text-analysis12.p.rapidapi.com/sentiment-analysis/api/v1.1";
-    const options = {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "X-RapidAPI-Key": "21ab335ba4msh85f8c88bb6ae3f6p14ac31jsn78a47852eb0d",
-        "X-RapidAPI-Host": "text-analysis12.p.rapidapi.com",
-      },
-      body: JSON.stringify({
-        language: "english",
-        text: summaryResult,
-      }),
-    };
-
-    try {
-      const response = await fetch(url, options);
-      const result = await response.json();
-
-      if (result.sentiment) {
-        console.log(result.sentiment);
-        console.log(result);
-        setSentimentAnalysisResult(result.sentiment);
-        setAggregateSentiment(result.aggregate_sentiment);
-      } else {
-        console.error("Sentiment field not found in the response");
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const toggleAccordion = (index) => {
-    setActiveAccordion(activeAccordion === index ? null : index);
-  };
-
   const handleBookmarkClick = async () => {
     setShowModal(true);
   };
@@ -327,45 +199,48 @@ function MainPage() {
     <>
       <TopNavbar />
       <div className={`main-container ${isDarkMode ? "dark-mode" : ""}`}>
-        <div className="control">
-          <input
-            className="url-input"
-            type="text"
-            placeholder="Paste URL"
-            value={url}
-            onChange={handleUrlChange}
-          />
-          <div className="button-container">
-            <Button onClick={handleDetectClick}>Detect</Button>
-            <Button
-              onClick={handleScrapeClick}
-              disabled={scrapeButtonDisabled}
-              className="button-scrape"
-            >
-              Scrape!
-            </Button>
+        <div
+          className={`flex-container ${
+            title && cleanedArticle ? "collapsed" : ""
+          }`}
+        >
+          <div className="control">
+            <Form.Control
+              className="url-input"
+              type="text"
+              placeholder="Paste URL"
+              value={url}
+              onChange={handleUrlChange}
+              style={{ fontSize: "1.2rem", padding: "0.5rem" }} // Adjust the font size and padding as needed
+            />
+            <div className="button-container">
+              <Button
+                style={{ fontSize: "1.2rem", padding: "0.5rem" }}
+                onClick={handleDetectClick}
+              >
+                Detect
+              </Button>
+              <Button
+                style={{ fontSize: "1.2rem", padding: "0.5rem" }}
+                onClick={handleScrapeClick}
+                disabled={scrapeButtonDisabled}
+                className="button-scrape"
+              >
+                Scrape!
+              </Button>
+            </div>
+            {cleanedArticle && (
+              <Button
+                variant="warning"
+                className="bookmarkBtn"
+                onClick={handleBookmarkClick}
+              >
+                <BsBookmarkStarFill />
+              </Button>
+            )}
           </div>
         </div>
-        <div className="cards-container">
-          <Card className="detected-site">
-            {selectedSite && (
-              <div>
-                <h3>{selectedSite.name}</h3>
-              </div>
-            )}
-          </Card>
 
-          <Card className="detected-lang">
-            {languageDetectionResult && (
-              <div>
-                <h3>{languageDetectionResult}</h3>
-              </div>
-            )}
-          </Card>
-          <Button variant="warning" onClick={handleBookmarkClick}>
-            <BsBookmarkStarFill />
-          </Button>
-        </div>
         <div>
           {loading && <CustomSpinner />}
 
@@ -374,6 +249,7 @@ function MainPage() {
             <div className="loader"></div>
           </div>
         )} */}
+
           {title && cleanedArticle && (
             <Card className="result-container">
               <h2>{title}</h2>
@@ -389,22 +265,6 @@ function MainPage() {
               )}
             </Card>
           )}
-          <div className="sentiment-result">
-            {sentimentAnalysisResult && (
-              <>
-                <p>
-                  Sentiment analysis result: mostly{" "}
-                  <b>{sentimentAnalysisResult}</b>
-                </p>
-                <div>
-                  <SentimentBar
-                    sentimentAnalysisResult={sentimentAnalysisResult}
-                    aggregateSentiment={aggregateSentiment}
-                  />
-                </div>
-              </>
-            )}
-          </div>
         </div>
         <Modal show={showErrorModal} onHide={handleCloseErrorModal}>
           <Modal.Header closeButton>
@@ -444,7 +304,7 @@ function MainPage() {
           </Modal.Footer>
         </Modal>
 
-        <SummaryComponent
+        {/* <SummaryComponent
           toggleAccordion={toggleAccordion}
           activeAccordion={activeAccordion}
           cleanedArticle={cleanedArticle}
@@ -453,7 +313,7 @@ function MainPage() {
           toggleAccordion={toggleAccordion}
           summaryResult={summaryResult}
           activeAccordion={activeAccordion}
-        />
+        /> */}
       </div>
     </>
   );

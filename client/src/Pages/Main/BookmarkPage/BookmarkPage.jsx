@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../../Contexts/AuthContext";
-import { Card, Button } from "react-bootstrap";
+import { Card, Button, Modal } from "react-bootstrap";
 import TopNavbar from "../../../Components/TopNavbar";
 import { Link } from "react-router-dom";
 import "./BookmarkPage.css";
 import { useDarkMode } from "../../../Contexts/DarkModeContext";
+import { IoCloseCircle } from "react-icons/io5";
 
 function BookmarkPage() {
   const { user } = useAuth();
   const [bookmarks, setBookmarks] = useState([]);
   const { isDarkMode } = useDarkMode();
+
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [selectedBookmark, setSelectedBookmark] = useState(null);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -48,13 +52,34 @@ function BookmarkPage() {
     return text.substring(0, maxLength) + "...";
   };
 
+  const handleShowModal = (bookmark) => {
+    setSelectedBookmark(bookmark);
+    setShowConfirmationModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedBookmark(null);
+    setShowConfirmationModal(false);
+  };
+
+  const handleDeleteBookmark = () => {
+    console.log(`Deleting bookmark with ID: ${selectedBookmark.id}`);
+    handleCloseModal();
+  };
+
   return (
     <>
       <TopNavbar />
       <h2>Your Bookmarks</h2>
       <div className="bookmark-container">
         {bookmarks.map((bookmark) => (
-          <Card key={bookmark.id} className="bookmark-card">
+          <Card key={bookmark.id} className="bookmark-card position-relative">
+            <IoCloseCircle
+              size={30}
+              className="closeBtn"
+              style={{ cursor: "pointer" }}
+              onClick={() => handleShowModal(bookmark)}
+            />
             <Card.Body>
               <Card.Title className="bookmark-title">
                 {bookmark.name}
@@ -70,6 +95,27 @@ function BookmarkPage() {
           </Card>
         ))}
       </div>
+
+      {/* Confirmation Modal */}
+      <Modal
+        show={showConfirmationModal}
+        onHide={handleCloseModal}
+        className={isDarkMode ? "dark-mode" : ""}
+        data-bs-modal={isDarkMode ? "dark" : ""}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Deletion</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Are you sure you want to delete the bookmark?</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseModal}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={handleDeleteBookmark}>
+            Delete
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </>
   );
 }

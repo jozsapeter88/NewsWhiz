@@ -48,13 +48,11 @@ public class NewsSiteService : INewsSiteService
             }
             else
             {
-                // Handle the case where the title or article element is not found.
                 return null;
             }
         }
         catch (Exception ex)
         {
-            // Handle any exceptions that may occur during scraping.
             throw new ApplicationException("Error scraping website", ex);
         }
     }
