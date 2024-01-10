@@ -2,12 +2,10 @@ import React, { useState, useEffect } from "react";
 import { Form, Card, Modal, Button } from "react-bootstrap";
 import { BsBookmarkStarFill } from "react-icons/bs";
 import "./MainPage.css";
-import SentimentBar from "../../Components/SentimentBar";
 import TopNavbar from "../../Components/TopNavbar";
 import CustomSpinner from "../../Components/CustomSpinner";
 import { useDarkMode } from "../../Contexts/DarkModeContext";
 import { useAuth } from "../../Contexts/AuthContext";
-import pako from "pako";
 
 function MainPage() {
   const [newsSites, setNewsSites] = useState([]);
@@ -77,11 +75,7 @@ function MainPage() {
           selectedSite: selectedSite.name,
           url: url,
         };
-
-        //  the entire line takes the article text, compresses it using the DEFLATE algorithm, 
-        // and then encodes the compressed result in Base64. 
-        // The resulting Base64 string is assigned to the text property of the requestData object. 
-        requestData.text = btoa(pako.deflate(article, { to: "string" }));
+        requestData.text = article
 
         const response = await fetch(
           "http://localhost:5092/api/NewsSite/scrape",
