@@ -117,40 +117,43 @@ function BookmarkId() {
               <Dropdown.Item onClick={handleDropdownSelection}>
                 {summaryResult ? "Show original text" : "Summarize"}
               </Dropdown.Item>
+              <Dropdown.Item as={Link} to={`/bookmarkEdit/${id}`}>
+                Edit
+              </Dropdown.Item>
             </Dropdown.Menu>
           </Dropdown>
         </div>
       </div>
       <div className={`page-container ${isDarkMode ? "dark-mode" : ""}`}>
-      {loading ? (
+        {loading ? (
           <p>Loading...</p>
         ) : (
           <>
-        {/* Slider for summary percentage */}
-        {summaryResult && (
-          <Form className="summary-slider">
-            <Form.Label>Summary Percentage: {summaryPercent}%</Form.Label>
-            <Form.Range
-              value={summaryPercent}
-              onChange={handleSliderChange}
-              min={0}
-              max={100}
-            />
-          </Form>
-        )}
-        <div>
-          <h2 className="textTitle">
-            {bookmark ? <p>{bookmark.title}</p> : <p>Loading...</p>}
-          </h2>
-          <div className="textBody">
-            {summaryResult !== null ? (
-              <p>{summaryResult}</p>
-            ) : (
-              <p>{bookmark.text}</p>
+            {/* Slider for summary percentage */}
+            {summaryResult && (
+              <Form className="summary-slider">
+                <Form.Label>Summary Percentage: {summaryPercent}%</Form.Label>
+                <Form.Range
+                  value={summaryPercent}
+                  onChange={handleSliderChange}
+                  min={0}
+                  max={100}
+                />
+              </Form>
             )}
-          </div>
-        </div>
-        </>
+            <div>
+              <h2 className="textTitle">
+                {bookmark ? <p>{bookmark.title}</p> : <p>Loading...</p>}
+              </h2>
+              <div className="textBody">
+                {summaryResult !== null ? (
+                  <p>{summaryResult}</p>
+                ) : (
+                  <p>{bookmark.text}</p>
+                )}
+              </div>
+            </div>
+          </>
         )}
       </div>
     </>
