@@ -20,7 +20,18 @@ public class BookmarkService : IBookmarkService
         await _dbContext.SaveChangesAsync();
         return bookmark.Id;
     }
+    
+    public async Task EditBookmarkAsync(int id, string text)
+    {
+        var bookmark = await _dbContext.Bookmarks.FindAsync(id);
 
+        if (bookmark != null)
+        {
+            bookmark.Text = text;
+            await _dbContext.SaveChangesAsync();
+        }
+    }
+    
     public async Task<IEnumerable<Bookmark>> GetBookmarksAsync(string userId)
     {
         return await _dbContext.Bookmarks.Where(b => b.UserId == userId).ToListAsync();
