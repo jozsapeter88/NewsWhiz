@@ -17,8 +17,7 @@ function BookmarkId() {
   const [summaryResult, setSummaryResult] = useState(null);
   const [summaryPercent, setSummaryPercent] = useState(10);
 
-  const [loading, setLoading] = useState(true); // New loading state
-
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -43,7 +42,7 @@ function BookmarkId() {
       } catch (error) {
         console.error("Error fetching bookmark:", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     };
 
@@ -149,7 +148,7 @@ function BookmarkId() {
                 {summaryResult !== null ? (
                   <p>{summaryResult}</p>
                 ) : (
-                  <p>{bookmark.text}</p>
+                  <p>{bookmark?.text || "No text available"}</p>
                 )}
               </div>
             </div>
