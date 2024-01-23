@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using server.Areas.Identity.Data.Models;
 using server.Models;
 using server.Models.DBContext;
@@ -72,46 +73,24 @@ namespace server.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> EditBookmark(int id, [FromBody] BookmarkEditRequest request)
         {
-            var user = await _userManager.GetUserAsync(User);
-
             try
             {
-                // Check if the bookmark with the given id exists
-                var existingBookmark = await _bookmarkService.GetBookmarkByIdAsync(id);
+                var existingBookmark = await _dbContext.Bookmarks.FirstOrDefaultAsync(b => b.Id == id);
+
                 if (existingBookmark == null)
                 {
-                    return NotFound($"Bookmark with ID {id} not found.");
-                }
-                
-                // Validate the incoming request
-                if (string.IsNullOrEmpty(request.Text))
-                {
-                    return BadRequest("Text field is required.");
+                    return NotFound(); // Bookmark with the given ID not found
                 }
 
-                // Ensure the UserId is the same as the current user's Id
-                if (request.UserId != user.Id)
-                {
-                    return BadRequest("Invalid UserId.");
-                }
-
-                // Update the existing bookmark's text
+                // Update the existing bookmark's text property
                 existingBookmark.Text = request.Text;
-                
-                // Update the existing bookmark's title if it is different from the original
-                if (!string.IsNullOrEmpty(request.Title) && request.Title != existingBookmark.Title)
-                {
-                    existingBookmark.Title = request.Title;
-                }
-
 
                 await _dbContext.SaveChangesAsync();
 
-                return Ok(new { Message = "Bookmark text updated successfully." });
+                return Ok(new { Message = "Bookmark text updated successfully" });
             }
             catch (Exception ex)
             {
-                // Log the error to a more comprehensive logging system
                 Console.Error.WriteLine($"Error updating bookmark: {ex.Message}");
                 return StatusCode(500, "Internal Server Error");
             }

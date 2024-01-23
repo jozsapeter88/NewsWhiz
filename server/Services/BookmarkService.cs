@@ -7,7 +7,7 @@ namespace server.Services;
 public class BookmarkService : IBookmarkService
 {
     private readonly ApplicationDbContext _dbContext;
-    
+
     public BookmarkService(ApplicationDbContext dbContext)
     {
         _dbContext = dbContext;
@@ -20,23 +20,49 @@ public class BookmarkService : IBookmarkService
         await _dbContext.SaveChangesAsync();
         return bookmark.Id;
     }
-    
-    public async Task EditBookmarkAsync(int id, string text)
-    {
-        var bookmark = await _dbContext.Bookmarks.FindAsync(id);
 
-        if (bookmark != null)
+
+    public async Task<bool> EditBookmarkAsync(int id, BookmarkEditRequest request, string userId)
+    {
+        try
         {
-            bookmark.Text = text;
-            await _dbContext.SaveChangesAsync();
+            // Check if the bookmark with the given id exists
+            var existingBookmark = await _dbContext.Bookmarks.FirstOrDefaultAsync(b => b.Id == id);
+
+            if (existingBookmark == null)
+            {
+                return false; // Bookmark with the given ID not found
+            }
+
+            // Ensure the UserId is the same as the current user's Id
+            if (!string.IsNullOrEmpty(request.UserId) && request.UserId != userId)
+            {
+                return false; // Invalid UserId
+            }
+
+            // Only update the 'Text' property if it is different from the original
+            if (!string.IsNullOrEmpty(request.Text) && existingBookmark.Text != request.Text)
+            {
+                existingBookmark.Text = request.Text;
+                await _dbContext.SaveChangesAsync();
+            }
+
+            return true; // Bookmark edited successfully
+        }
+        catch (Exception ex)
+        {
+            // Log the error to a more comprehensive logging system
+            Console.Error.WriteLine($"Error updating bookmark: {ex.Message}");
+            return false; // Internal Server Error
         }
     }
-    
+
+
     public async Task<IEnumerable<Bookmark>> GetBookmarksAsync(string userId)
     {
         return await _dbContext.Bookmarks.Where(b => b.UserId == userId).ToListAsync();
     }
-    
+
     public async Task<Bookmark> GetBookmarkByIdAsync(int id)
     {
         return await _dbContext.Bookmarks.FindAsync(id);
