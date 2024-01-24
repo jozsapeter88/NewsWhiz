@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Navbar from "react-bootstrap/Navbar";
 import Container from "react-bootstrap/Container";
-import { Link } from "react-router-dom";
+import { Link, useNavigate  } from "react-router-dom";
 import { MdOutlineDarkMode, MdOutlineLightMode } from "react-icons/md";
 import { useAuth } from "../Contexts/AuthContext";
 import "./TopNavbar.css";
@@ -15,10 +15,12 @@ function TopNavbar() {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
   const { user, logout } = useAuth();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const navigate = useNavigate();
 
   const handleConfirmLogout = () => {
     logout();
     handleCloseLogoutModal();
+    navigate("/login");
   };
 
   const handleShowLogoutModal = () => {

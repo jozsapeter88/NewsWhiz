@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import TopNavbar from "../../../Components/TopNavbar";
 import { useDarkMode } from "../../../Contexts/DarkModeContext";
 import "./BookmarkId.css";
 import { Link } from "react-router-dom";
 import { IoCaretBack } from "react-icons/io5";
-import Button from "react-bootstrap/esm/Button";
+import { Button, Badge } from "react-bootstrap";
 import "./BookmarkEdit.css";
 import { useAuth } from "../../../Contexts/AuthContext";
 
@@ -17,6 +17,7 @@ function BookmarkEdit() {
   const { isDarkMode } = useDarkMode();
   const [loading, setLoading] = useState(true);
   const [editedText, setEditedText] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (isDarkMode) {
@@ -32,7 +33,7 @@ function BookmarkEdit() {
         const response = await fetch(`http://localhost:5092/api/Bookmark/${id}`);
         if (response.ok) {
           const data = await response.json();
-          setEditedText(data.text || ""); // Set the initial text value
+          setEditedText(data.text || "");
           setBookmark(data)
           console.log(data)
         } else {
@@ -58,13 +59,14 @@ function BookmarkEdit() {
         },
         body: JSON.stringify({
           text: editedText,
-          userId: loggedInUser, // Include the user ID in the payload
+          userId: loggedInUser,
         }),
       });
   
       if (response.ok) {
         console.log("Bookmark text updated successfully.");
-        // Perform any additional actions after a successful update
+        window.alert("Saved successfully");
+        navigate(`/bookmark/${id}`)
       } else {
         const errorData = await response.json();
         console.error("Error updating bookmark:", errorData.errors);
@@ -77,7 +79,6 @@ function BookmarkEdit() {
 
   const handleTextSelection = () => {
     const selectedText = window.getSelection().toString();
-    // Handle the selected text (e.g., highlight or perform other actions)
   };
 
   const handleTextChange = (event) => {
@@ -97,7 +98,9 @@ function BookmarkEdit() {
         <h2 className="bookmarkName"> 
           {bookmark ? <p>{bookmark.name}</p> : <p>Loading...</p>}
         </h2>
-        <h1 className="editText">Editing mode</h1>
+        <Badge bg="warning" text="dark" style={{ marginLeft: "auto", marginRight: "50vh" }}>
+        Editing Mode
+      </Badge>      
       </div>
       <div className={`page-container ${isDarkMode ? "dark-mode" : ""}`}>
         {loading ? (
