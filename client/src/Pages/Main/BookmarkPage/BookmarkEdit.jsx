@@ -5,7 +5,7 @@ import { useDarkMode } from "../../../Contexts/DarkModeContext";
 import "./BookmarkId.css";
 import { Link } from "react-router-dom";
 import { IoCaretBack } from "react-icons/io5";
-import { Button, Badge } from "react-bootstrap";
+import { Button, Badge, Card } from "react-bootstrap";
 import "./BookmarkEdit.css";
 import { useAuth } from "../../../Contexts/AuthContext";
 
@@ -30,12 +30,14 @@ function BookmarkEdit() {
   useEffect(() => {
     const fetchBookmark = async () => {
       try {
-        const response = await fetch(`http://localhost:5092/api/Bookmark/${id}`);
+        const response = await fetch(
+          `http://localhost:5092/api/Bookmark/${id}`
+        );
         if (response.ok) {
           const data = await response.json();
           setEditedText(data.text || "");
-          setBookmark(data)
-          console.log(data)
+          setBookmark(data);
+          console.log(data);
         } else {
           console.error("Error fetching bookmark:", response.statusText);
         }
@@ -45,13 +47,12 @@ function BookmarkEdit() {
         setLoading(false);
       }
     };
-  
+
     fetchBookmark();
   }, [id]);
 
   const handleSaveButtonClick = async () => {
     try {
-  
       const response = await fetch(`http://localhost:5092/api/Bookmark/${id}`, {
         method: "PUT",
         headers: {
@@ -62,11 +63,11 @@ function BookmarkEdit() {
           userId: loggedInUser,
         }),
       });
-  
+
       if (response.ok) {
         console.log("Bookmark text updated successfully.");
-        window.alert("Saved successfully");
-        navigate(`/bookmark/${id}`)
+        window.alert("Bookmark saved successfully!");
+        navigate(`/bookmark/${id}`);
       } else {
         const errorData = await response.json();
         console.error("Error updating bookmark:", errorData.errors);
@@ -75,7 +76,6 @@ function BookmarkEdit() {
       console.error("Error updating bookmark:", error);
     }
   };
-  
 
   const handleTextSelection = () => {
     const selectedText = window.getSelection().toString();
@@ -95,12 +95,16 @@ function BookmarkEdit() {
             <IoCaretBack />
           </Button>
         </Link>
-        <h2 className="bookmarkName"> 
+        <h2 className="bookmarkName">
           {bookmark ? <p>{bookmark.name}</p> : <p>Loading...</p>}
         </h2>
-        <Badge bg="warning" text="dark" style={{ marginLeft: "auto", marginRight: "50vh" }}>
-        Editing Mode
-      </Badge>      
+        <Badge
+          bg="warning"
+          text="dark"
+          style={{ marginLeft: "auto", marginRight: "50vh" }}
+        >
+          Editing Mode
+        </Badge>
       </div>
       <div className={`page-container ${isDarkMode ? "dark-mode" : ""}`}>
         {loading ? (
@@ -108,19 +112,33 @@ function BookmarkEdit() {
         ) : (
           <>
             <div>
-              <h2 className="textTitle">
-                {bookmark ? <p>{bookmark.title}</p> : <p>Loading...</p>}
-              </h2>
-              <div
-                className="textBody"
-                contentEditable={true}
-                onMouseUp={handleTextSelection}
-                onInput={handleTextChange}
-                dangerouslySetInnerHTML={{
-                  __html: bookmark == null ? loading : bookmark.text,
-                }}
-              ></div>
-              <Button onClick={handleSaveButtonClick}>Save</Button>
+              {/* Title Card */}
+              <Card className="mb-3 w-50 mx-auto">
+                <Card.Body>
+                  <Card.Title>
+                    {bookmark ? <p>{bookmark.title}</p> : <p>Loading...</p>}
+                  </Card.Title>
+                </Card.Body>
+              </Card>
+
+              {/* Text Card */}
+              <Card className="w-50 mx-auto">
+                <Card.Body>
+                  <div
+                    className="textBody"
+                    contentEditable={true}
+                    onMouseUp={handleTextSelection}
+                    onInput={handleTextChange}
+                    dangerouslySetInnerHTML={{
+                      __html: bookmark == null ? loading : bookmark.text,
+                    }}
+                  ></div>
+                </Card.Body>
+              </Card>
+
+              <Button onClick={handleSaveButtonClick} className="mt-3">
+                Save
+              </Button>
             </div>
           </>
         )}
