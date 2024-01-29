@@ -75,7 +75,7 @@ function MainPage() {
           selectedSite: selectedSite.name,
           url: url,
         };
-        requestData.text = article
+        requestData.text = article;
 
         const response = await fetch(
           "http://localhost:5092/api/NewsSite/scrape",
@@ -205,7 +205,7 @@ function MainPage() {
               placeholder="Paste URL"
               value={url}
               onChange={handleUrlChange}
-              style={{ fontSize: "1.2rem", padding: "0.5rem" }} // Adjust the font size and padding as needed
+              style={{ fontSize: "1.2rem", padding: "0.5rem" }}
             />
             <div className="button-container">
               <Button
@@ -237,13 +237,6 @@ function MainPage() {
 
         <div>
           {loading && <CustomSpinner />}
-
-          {/* {loading && (
-          <div className="loading-spinner-container">
-            <div className="loader"></div>
-          </div>
-        )} */}
-
           {title && cleanedArticle && (
             <Card className="result-container">
               <h2>{title}</h2>
@@ -297,17 +290,6 @@ function MainPage() {
             </Button>
           </Modal.Footer>
         </Modal>
-
-        {/* <SummaryComponent
-          toggleAccordion={toggleAccordion}
-          activeAccordion={activeAccordion}
-          cleanedArticle={cleanedArticle}
-        />
-        <KeywordComponent
-          toggleAccordion={toggleAccordion}
-          summaryResult={summaryResult}
-          activeAccordion={activeAccordion}
-        /> */}
       </div>
     </>
   );

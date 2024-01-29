@@ -58,7 +58,8 @@ function BookmarkId() {
   };
 
   const handleSummarization = async () => {
-    const url = "https://text-analysis12.p.rapidapi.com/summarize-text/api/v1.1";
+    const url =
+      "https://text-analysis12.p.rapidapi.com/summarize-text/api/v1.1";
     const options = {
       method: "POST",
       headers: {
@@ -72,20 +73,20 @@ function BookmarkId() {
         text: bookmark.text,
       }),
     };
-  
+
     try {
       const response = await fetch(url, options);
       const result = await response.json();
-  
+
       if (response.ok) {
-        setSummaryResult(result.summary); // Update the state here
+        setSummaryResult(result.summary);
       } else {
         console.error("Error in summarization:", result.msg);
       }
     } catch (error) {
       console.error(error);
     }
-  };  
+  };
 
   const handleSliderChange = (event) => {
     setSummaryPercent(parseInt(event.target.value, 10));
@@ -140,19 +141,21 @@ function BookmarkId() {
               </Form>
             )}
             <div>
-            <Card className="mb-3 w-50 mx-auto">
+              <Card className="mb-3 w-50 mx-auto">
                 <Card.Body>
                   <Card.Title className="textTitle">
                     {bookmark ? <p>{bookmark.title}</p> : <p>Loading...</p>}
                   </Card.Title>
                 </Card.Body>
-                </Card>
-                <Card className="w-50 mx-auto">
+              </Card>
+              <Card className="w-50 mx-auto">
                 <Card.Body>
                   {summaryResult !== null ? (
                     <Card.Text>{summaryResult}</Card.Text>
                   ) : (
-                    <Card.Text>{bookmark?.text || "No text available"}</Card.Text>
+                    <Card.Text>
+                      {bookmark?.text || "No text available"}
+                    </Card.Text>
                   )}
                 </Card.Body>
               </Card>
