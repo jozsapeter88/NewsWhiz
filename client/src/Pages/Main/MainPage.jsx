@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Form, Card, Modal, Button } from "react-bootstrap";
+import { Form, Card, Modal, Button, Alert } from "react-bootstrap";
 import { BsBookmarkStarFill } from "react-icons/bs";
 import "./MainPage.css";
 import TopNavbar from "../../Components/TopNavbar";
@@ -19,6 +19,8 @@ function MainPage() {
   const [showFullContent, setShowFullContent] = useState(false);
   const [bookmarkName, setBookmarkName] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [showAlert, setShowAlert] = useState(true);
+
   const { isDarkMode } = useDarkMode();
   const { user } = useAuth();
 
@@ -46,8 +48,8 @@ function MainPage() {
 
   const handleUrlChange = (e) => {
     setUrl(e.target.value);
+    setShowAlert(false);
   };
-
   const extractSiteNameFromUrl = (url) => {
     if (!url.startsWith("http://") && !url.startsWith("https://")) {
       url = "https://" + url;
@@ -193,6 +195,16 @@ function MainPage() {
     <>
       <TopNavbar />
       <div className={`main-container ${isDarkMode ? "dark-mode" : ""}`}>
+        
+      {showAlert && (
+          <Alert variant="warning" onClose={() => setShowAlert(false)} dismissible>
+            During development, the application only supports some news sites.{" "}
+            <Alert.Link onClick={() => setUrl("https://www.bbc.com/culture/article/20240129-dr-strangelove-at-60-the-mystery-behind-kubricks-cold-war-masterpiece")}>
+              Click here to generate a usable link.
+            </Alert.Link>
+          </Alert>
+        )}
+
         <div
           className={`flex-container ${
             title && cleanedArticle ? "collapsed" : ""
