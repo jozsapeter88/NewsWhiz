@@ -20,6 +20,7 @@ function MainPage() {
   const [bookmarkName, setBookmarkName] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [showAlert, setShowAlert] = useState(true);
+  const [detectionSuccess, setDetectionSuccess] = useState(false);
 
   const { isDarkMode } = useDarkMode();
   const { user } = useAuth();
@@ -68,16 +69,56 @@ function MainPage() {
     }
   };
 
-  const handleScrapeClick = async () => {
-    if (selectedSite && url) {
+  useEffect(() => {
+    // Trigger handleScraping when selectedSite changes
+    if (selectedSite && url && detectionSuccess) {
+      handleScraping();
+    }
+  }, [selectedSite, url, detectionSuccess]);
+
+  const handleDetectClick = async () => {
+    const siteName = extractSiteNameFromUrl(url);
+    let wwwAlertShown = false;
+
+    try {
+      if (siteName === "default") {
+        alert("Please add 'www.' to the URL for better detection.");
+        wwwAlertShown = true;
+      }
+
+      const response = await fetch(
+        `http://localhost:5092/api/NewsSite/getNewsSiteByName?name=${siteName}`
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data) {
+          setSelectedSite(data);
+          setScrapeButtonDisabled(false);
+          setDetectionSuccess(true);
+        }
+      } else {
+        setDetectionSuccess(false);
+        if (!wwwAlertShown) {
+          alert("News Site not found. Maybe it is not in our database yet.");
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching NewsSite data:", error);
+      setDetectionSuccess(false);
+    }
+  };
+
+  const handleScraping = async () => {
+    if (selectedSite && url && detectionSuccess) {
       setLoading(true);
 
       try {
         const requestData = {
           selectedSite: selectedSite.name,
           url: url,
+          text: article,
         };
-        requestData.text = article;
 
         const response = await fetch(
           "http://localhost:5092/api/NewsSite/scrape",
@@ -104,7 +145,6 @@ function MainPage() {
           setTitle(data.title);
           setArticle(data.article);
         } else {
-          console.log(requestData);
           console.error("Error scraping website");
           setTitle("");
           setArticle("");
@@ -118,37 +158,9 @@ function MainPage() {
         setLoading(false);
       }
     } else {
-      console.error("Selected NewsSite or URL is missing.");
-    }
-  };
-
-  const handleDetectClick = async () => {
-    const siteName = extractSiteNameFromUrl(url);
-    let wwwAlertShown = false;
-
-    try {
-      if (siteName === "default") {
-        alert("Please add 'www.' to the URL for better detection.");
-        wwwAlertShown = true;
-      }
-
-      const response = await fetch(
-        `http://localhost:5092/api/NewsSite/getNewsSiteByName?name=${siteName}`
+      console.error(
+        "Selected NewsSite or URL is missing or detection unsuccessful."
       );
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data) {
-          setSelectedSite(data);
-          setScrapeButtonDisabled(false);
-        }
-      } else {
-        if (!wwwAlertShown) {
-          alert("News Site not found. Maybe it is not in our database yet.");
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching NewsSite data:", error);
     }
   };
 
@@ -195,11 +207,20 @@ function MainPage() {
     <>
       <TopNavbar />
       <div className={`main-container ${isDarkMode ? "dark-mode" : ""}`}>
-        
-      {showAlert && (
-          <Alert variant="warning" onClose={() => setShowAlert(false)} dismissible>
+        {showAlert && (
+          <Alert
+            variant="warning"
+            onClose={() => setShowAlert(false)}
+            dismissible
+          >
             During development, the application only supports some news sites.{" "}
-            <Alert.Link onClick={() => setUrl("https://www.bbc.com/culture/article/20240129-dr-strangelove-at-60-the-mystery-behind-kubricks-cold-war-masterpiece")}>
+            <Alert.Link
+              onClick={() =>
+                setUrl(
+                  "https://www.bbc.com/culture/article/20240129-dr-strangelove-at-60-the-mystery-behind-kubricks-cold-war-masterpiece"
+                )
+              }
+            >
               Click here to generate a usable link.
             </Alert.Link>
           </Alert>
@@ -221,18 +242,10 @@ function MainPage() {
             />
             <div className="button-container">
               <Button
-                style={{ fontSize: "1.2rem", padding: "0.5rem" }}
+                style={{ fontSize: "1.2rem", padding: "0.5rem", width: "15vh"}}
                 onClick={handleDetectClick}
               >
-                Detect
-              </Button>
-              <Button
-                style={{ fontSize: "1.2rem", padding: "0.5rem" }}
-                onClick={handleScrapeClick}
-                disabled={scrapeButtonDisabled}
-                className="button-scrape"
-              >
-                Scrape!
+                Get Article
               </Button>
             </div>
             {cleanedArticle && (
