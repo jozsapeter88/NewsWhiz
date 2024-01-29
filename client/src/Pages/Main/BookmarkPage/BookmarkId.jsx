@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Dropdown, Form } from "react-bootstrap";
+import { Dropdown, Form, Card } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import TopNavbar from "../../../Components/TopNavbar";
 import { useDarkMode } from "../../../Contexts/DarkModeContext";
@@ -17,8 +17,7 @@ function BookmarkId() {
   const [summaryResult, setSummaryResult] = useState(null);
   const [summaryPercent, setSummaryPercent] = useState(10);
 
-  const [loading, setLoading] = useState(true); // New loading state
-
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -43,7 +42,7 @@ function BookmarkId() {
       } catch (error) {
         console.error("Error fetching bookmark:", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     };
 
@@ -59,8 +58,7 @@ function BookmarkId() {
   };
 
   const handleSummarization = async () => {
-    const url =
-      "https://text-analysis12.p.rapidapi.com/summarize-text/api/v1.1";
+    const url = "https://text-analysis12.p.rapidapi.com/summarize-text/api/v1.1";
     const options = {
       method: "POST",
       headers: {
@@ -74,20 +72,20 @@ function BookmarkId() {
         text: bookmark.text,
       }),
     };
-
+  
     try {
       const response = await fetch(url, options);
       const result = await response.json();
-
-      if (result.ok) {
-        setSummaryResult(result.summary);
+  
+      if (response.ok) {
+        setSummaryResult(result.summary); // Update the state here
       } else {
         console.error("Error in summarization:", result.msg);
       }
     } catch (error) {
       console.error(error);
     }
-  };
+  };  
 
   const handleSliderChange = (event) => {
     setSummaryPercent(parseInt(event.target.value, 10));
@@ -117,40 +115,49 @@ function BookmarkId() {
               <Dropdown.Item onClick={handleDropdownSelection}>
                 {summaryResult ? "Show original text" : "Summarize"}
               </Dropdown.Item>
+              <Dropdown.Item as={Link} to={`/bookmarkEdit/${id}`}>
+                Edit
+              </Dropdown.Item>
             </Dropdown.Menu>
           </Dropdown>
         </div>
       </div>
       <div className={`page-container ${isDarkMode ? "dark-mode" : ""}`}>
-      {loading ? (
+        {loading ? (
           <p>Loading...</p>
         ) : (
           <>
-        {/* Slider for summary percentage */}
-        {summaryResult && (
-          <Form className="summary-slider">
-            <Form.Label>Summary Percentage: {summaryPercent}%</Form.Label>
-            <Form.Range
-              value={summaryPercent}
-              onChange={handleSliderChange}
-              min={0}
-              max={100}
-            />
-          </Form>
-        )}
-        <div>
-          <h2 className="textTitle">
-            {bookmark ? <p>{bookmark.title}</p> : <p>Loading...</p>}
-          </h2>
-          <div className="textBody">
-            {summaryResult !== null ? (
-              <p>{summaryResult}</p>
-            ) : (
-              <p>{bookmark.text}</p>
+            {/* Slider for summary percentage */}
+            {summaryResult && (
+              <Form className="summary-slider">
+                <Form.Label>Summary Percentage: {summaryPercent}%</Form.Label>
+                <Form.Range
+                  value={summaryPercent}
+                  onChange={handleSliderChange}
+                  min={0}
+                  max={100}
+                />
+              </Form>
             )}
-          </div>
-        </div>
-        </>
+            <div>
+            <Card className="mb-3 w-50 mx-auto">
+                <Card.Body>
+                  <Card.Title className="textTitle">
+                    {bookmark ? <p>{bookmark.title}</p> : <p>Loading...</p>}
+                  </Card.Title>
+                </Card.Body>
+                </Card>
+                <Card className="w-50 mx-auto">
+                <Card.Body>
+                  {summaryResult !== null ? (
+                    <Card.Text>{summaryResult}</Card.Text>
+                  ) : (
+                    <Card.Text>{bookmark?.text || "No text available"}</Card.Text>
+                  )}
+                </Card.Body>
+              </Card>
+            </div>
+          </>
         )}
       </div>
     </>
