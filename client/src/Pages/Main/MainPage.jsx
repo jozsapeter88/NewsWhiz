@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useDarkMode } from "../../Contexts/DarkModeContext";
+import { useAuth } from "../../Contexts/AuthContext";
 import { Form, Card, Modal, Button, Alert } from "react-bootstrap";
 import { BsBookmarkStarFill } from "react-icons/bs";
 import "./MainPage.css";
 import TopNavbar from "../../Components/TopNavbar";
 import CustomSpinner from "../../Components/CustomSpinner";
-import { useDarkMode } from "../../Contexts/DarkModeContext";
-import { useAuth } from "../../Contexts/AuthContext";
 
 function MainPage() {
   const [newsSites, setNewsSites] = useState([]);
@@ -35,14 +35,21 @@ function MainPage() {
 
   useEffect(() => {
     fetch("http://localhost:5092/api/NewsSite/getAllNewsSites")
-      .then((response) => response.json())
-      .then((data) => {
-        setNewsSites(data);
-        console.log("News sites fetched successfully:", data);
-      })
-      .catch((error) => console.error("Error fetching news sites:", error));
+    .then((response) => response.json())
+    .then((data) => {
+      setNewsSites(data);
+      console.log("News sites fetched successfully:", data);
+    })
+    .catch((error) => console.error("Error fetching news sites:", error));
   }, []);
 
+  useEffect(() => {
+    // Trigger handleScraping when selectedSite changes
+    if (selectedSite && url && detectionSuccess) {
+      handleScraping();
+    }
+  }, [selectedSite, url, detectionSuccess]);
+  
   const handleCloseErrorModal = () => {
     setShowErrorModal(false);
   };
@@ -68,13 +75,6 @@ function MainPage() {
       return "default";
     }
   };
-
-  useEffect(() => {
-    // Trigger handleScraping when selectedSite changes
-    if (selectedSite && url && detectionSuccess) {
-      handleScraping();
-    }
-  }, [selectedSite, url, detectionSuccess]);
 
   const handleDetectClick = async () => {
     const siteName = extractSiteNameFromUrl(url);
