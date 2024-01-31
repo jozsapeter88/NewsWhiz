@@ -135,7 +135,11 @@ function BookmarkEdit() {
                 </Card.Body>
               </Card>
 
-              <Button onClick={handleSaveButtonClick} className="mt-3">
+              <Button
+                variant="success"
+                onClick={handleSaveButtonClick}
+                className="mt-3"
+              >
                 Save
               </Button>
             </div>

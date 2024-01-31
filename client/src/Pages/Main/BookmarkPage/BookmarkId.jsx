@@ -8,16 +8,19 @@ import { Link } from "react-router-dom";
 import { IoCaretBack } from "react-icons/io5";
 import { HiOutlineDotsHorizontal } from "react-icons/hi";
 import Button from "react-bootstrap/esm/Button";
+import { useAuth } from "../../../Contexts/AuthContext";
 
 function BookmarkId() {
+  const { user } = useAuth();
   const { id } = useParams();
+  const loggedInUser = user.id;
   const [bookmark, setBookmark] = useState(null);
   const { isDarkMode } = useDarkMode();
   const [loading, setLoading] = useState(true);
 
   const [summaryResult, setSummaryResult] = useState(null);
-  const [summaryPercent, setSummaryPercent] = useState(10);
-  const [selectedPercentage, setSelectedPercentage] = useState(summaryPercent);
+  const [summaryPercent, setSummaryPercent] = useState(100);
+  const [selectedPercentage, setSelectedPercentage] = useState(100);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -57,6 +60,32 @@ function BookmarkId() {
     }
   };
 
+  const saveSummarizedText = async () => {
+    try {
+      const response = await fetch(`http://localhost:5092/api/Bookmark/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text: summaryResult,
+          userId: loggedInUser, // Assuming you have user authentication
+        }),
+      });
+
+      if (response.ok) {
+        console.log("Summarized text saved successfully.");
+        window.alert("Summarized text saved successfully!");
+        // Optionally, you can navigate to another page or update the UI as needed.
+      } else {
+        const errorData = await response.json();
+        console.error("Error saving summarized text:", errorData.errors);
+      }
+    } catch (error) {
+      console.error("Error saving summarized text:", error);
+    }
+  };
+
   const handleSummarization = async () => {
     const url =
       "https://text-analysis12.p.rapidapi.com/summarize-text/api/v1.1";
@@ -79,7 +108,7 @@ function BookmarkId() {
       const result = await response.json();
 
       if (response.ok) {
-        setSummaryResult(result.summary);
+        await setSummaryResult(result.summary);
       } else {
         console.error("Error in summarization:", result.msg);
       }
@@ -170,6 +199,13 @@ function BookmarkId() {
                   )}
                 </Card.Body>
               </Card>
+              <Button
+                variant="success"
+                onClick={saveSummarizedText}
+                style={{ marginTop: "5vh" }}
+              >
+                Save
+              </Button>
             </div>
           </>
         )}
