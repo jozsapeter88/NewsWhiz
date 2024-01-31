@@ -13,11 +13,11 @@ function BookmarkId() {
   const { id } = useParams();
   const [bookmark, setBookmark] = useState(null);
   const { isDarkMode } = useDarkMode();
+  const [loading, setLoading] = useState(true);
 
   const [summaryResult, setSummaryResult] = useState(null);
   const [summaryPercent, setSummaryPercent] = useState(10);
-
-  const [loading, setLoading] = useState(true);
+  const [selectedPercentage, setSelectedPercentage] = useState(summaryPercent);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -89,7 +89,13 @@ function BookmarkId() {
   };
 
   const handleSliderChange = (event) => {
-    setSummaryPercent(parseInt(event.target.value, 10));
+    const value = parseInt(event.target.value, 10);
+    const roundedValue = Math.round(value / 10) * 10;
+    setSelectedPercentage(roundedValue);
+  };
+
+  const handleOkButtonClick = () => {
+    setSummaryPercent(selectedPercentage);
     handleSummarization();
   };
 
@@ -130,14 +136,19 @@ function BookmarkId() {
           <>
             {/* Slider for summary percentage */}
             {summaryResult && (
-              <Form className="summary-slider">
-                <Form.Label>Summary Percentage: {summaryPercent}%</Form.Label>
+              <Form className="summary-slider, mb-3 w-50 mx-auto">
+                <Form.Label>
+                  Summary Percentage: {selectedPercentage}%
+                </Form.Label>
                 <Form.Range
-                  value={summaryPercent}
+                  value={selectedPercentage}
                   onChange={handleSliderChange}
-                  min={0}
+                  min={10}
                   max={100}
                 />
+                <Button variant="primary" onClick={handleOkButtonClick}>
+                  Ok
+                </Button>
               </Form>
             )}
             <div>
