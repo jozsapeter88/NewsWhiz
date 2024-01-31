@@ -38,7 +38,6 @@ function MainPage() {
     .then((response) => response.json())
     .then((data) => {
       setNewsSites(data);
-      console.log("News sites fetched successfully:", data);
     })
     .catch((error) => console.error("Error fetching news sites:", error));
   }, []);
