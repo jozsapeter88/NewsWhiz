@@ -8,16 +8,19 @@ import { Link } from "react-router-dom";
 import { IoCaretBack } from "react-icons/io5";
 import { HiOutlineDotsHorizontal } from "react-icons/hi";
 import Button from "react-bootstrap/esm/Button";
+import { useAuth } from "../../../Contexts/AuthContext";
 
 function BookmarkId() {
+  const { user } = useAuth();
   const { id } = useParams();
+  const loggedInUser = user.id;
   const [bookmark, setBookmark] = useState(null);
   const { isDarkMode } = useDarkMode();
+  const [loading, setLoading] = useState(true);
 
   const [summaryResult, setSummaryResult] = useState(null);
-  const [summaryPercent, setSummaryPercent] = useState(10);
-
-  const [loading, setLoading] = useState(true);
+  const [summaryPercent, setSummaryPercent] = useState(100);
+  const [selectedPercentage, setSelectedPercentage] = useState(100);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -57,8 +60,35 @@ function BookmarkId() {
     }
   };
 
+  const saveSummarizedText = async () => {
+    try {
+      const response = await fetch(`http://localhost:5092/api/Bookmark/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text: summaryResult,
+          userId: loggedInUser, // Assuming you have user authentication
+        }),
+      });
+
+      if (response.ok) {
+        console.log("Summarized text saved successfully.");
+        window.alert("Summarized text saved successfully!");
+        // Optionally, you can navigate to another page or update the UI as needed.
+      } else {
+        const errorData = await response.json();
+        console.error("Error saving summarized text:", errorData.errors);
+      }
+    } catch (error) {
+      console.error("Error saving summarized text:", error);
+    }
+  };
+
   const handleSummarization = async () => {
-    const url = "https://text-analysis12.p.rapidapi.com/summarize-text/api/v1.1";
+    const url =
+      "https://text-analysis12.p.rapidapi.com/summarize-text/api/v1.1";
     const options = {
       method: "POST",
       headers: {
@@ -72,23 +102,29 @@ function BookmarkId() {
         text: bookmark.text,
       }),
     };
-  
+
     try {
       const response = await fetch(url, options);
       const result = await response.json();
-  
+
       if (response.ok) {
-        setSummaryResult(result.summary); // Update the state here
+        await setSummaryResult(result.summary);
       } else {
         console.error("Error in summarization:", result.msg);
       }
     } catch (error) {
       console.error(error);
     }
-  };  
+  };
 
   const handleSliderChange = (event) => {
-    setSummaryPercent(parseInt(event.target.value, 10));
+    const value = parseInt(event.target.value, 10);
+    const roundedValue = Math.round(value / 10) * 10;
+    setSelectedPercentage(roundedValue);
+  };
+
+  const handleOkButtonClick = () => {
+    setSummaryPercent(selectedPercentage);
     handleSummarization();
   };
 
@@ -129,33 +165,47 @@ function BookmarkId() {
           <>
             {/* Slider for summary percentage */}
             {summaryResult && (
-              <Form className="summary-slider">
-                <Form.Label>Summary Percentage: {summaryPercent}%</Form.Label>
+              <Form className="summary-slider, mb-3 w-50 mx-auto">
+                <Form.Label>
+                  Summary Percentage: {selectedPercentage}%
+                </Form.Label>
                 <Form.Range
-                  value={summaryPercent}
+                  value={selectedPercentage}
                   onChange={handleSliderChange}
-                  min={0}
+                  min={10}
                   max={100}
                 />
+                <Button variant="primary" onClick={handleOkButtonClick}>
+                  Ok
+                </Button>
               </Form>
             )}
             <div>
-            <Card className="mb-3 w-50 mx-auto">
+              <Card className="mb-3 w-50 mx-auto">
                 <Card.Body>
                   <Card.Title className="textTitle">
                     {bookmark ? <p>{bookmark.title}</p> : <p>Loading...</p>}
                   </Card.Title>
                 </Card.Body>
-                </Card>
-                <Card className="w-50 mx-auto">
+              </Card>
+              <Card className="w-50 mx-auto">
                 <Card.Body>
                   {summaryResult !== null ? (
                     <Card.Text>{summaryResult}</Card.Text>
                   ) : (
-                    <Card.Text>{bookmark?.text || "No text available"}</Card.Text>
+                    <Card.Text>
+                      {bookmark?.text || "No text available"}
+                    </Card.Text>
                   )}
                 </Card.Body>
               </Card>
+              <Button
+                variant="success"
+                onClick={saveSummarizedText}
+                style={{ marginTop: "5vh" }}
+              >
+                Save
+              </Button>
             </div>
           </>
         )}

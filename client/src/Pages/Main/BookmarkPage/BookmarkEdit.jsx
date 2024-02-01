@@ -37,7 +37,6 @@ function BookmarkEdit() {
           const data = await response.json();
           setEditedText(data.text || "");
           setBookmark(data);
-          console.log(data);
         } else {
           console.error("Error fetching bookmark:", response.statusText);
         }
@@ -136,7 +135,11 @@ function BookmarkEdit() {
                 </Card.Body>
               </Card>
 
-              <Button onClick={handleSaveButtonClick} className="mt-3">
+              <Button
+                variant="success"
+                onClick={handleSaveButtonClick}
+                className="mt-3"
+              >
                 Save
               </Button>
             </div>

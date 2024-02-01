@@ -62,14 +62,14 @@ body.dark-mode .card {
 }
 
 .dark-mode .modal header .btn-close {
-color: white;
+  color: white;
 }
 
 .dark-mode .modal-content {
-  background-color: #343a40; /* Adjust the background color for dark mode */
-  color: #fff; /* Adjust the text color for dark mode */
+  background-color: #343a40;
+  color: #fff;
 }
 
 .dark-mode .modal-header {
-  border-bottom: 1px solid #fff; /* Adjust the border color for dark mode */
+  border-bottom: 1px solid #fff;
 }
