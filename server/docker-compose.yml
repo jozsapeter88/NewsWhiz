@@ -1,0 +1,23 @@
+﻿version: '3'
+services:
+  backend:
+    image: mcr.microsoft.com/dotnet/sdk:7.0
+    ports:
+      - "5092:5092"
+    volumes:
+      - .:/app
+    working_dir: /app
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    command: ["dotnet", "watch", "run", "--urls", "http://0.0.0.0:5092", "--project", "server.csproj"]
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: NewsWhiz
+      POSTGRES_USER: localhost
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "5432:5432"
