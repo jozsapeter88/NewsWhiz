@@ -7,6 +7,7 @@ using server.Areas.Identity.Data.Models;
 using server.Areas.Identity.Enum;
 
 var builder = WebApplication.CreateBuilder(args);
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(
@@ -33,6 +34,16 @@ builder.Services.AddIdentity<User, IdentityRole>()
 builder.Services.AddTransient<INewsSiteService, NewsSiteService>();
 builder.Services.AddTransient<IUserService, UserService>();
 builder.Services.AddTransient<IBookmarkService, BookmarkService>();
+builder.Services.AddHttpClient("DeepLApiClient");
+
+builder.Services.AddScoped<DeepLTranslationService>(provider =>
+{
+    var httpClientFactory = provider.GetRequiredService<IHttpClientFactory>();
+    var httpClient = httpClientFactory.CreateClient("DeepLApiClient");
+    var configuration = provider.GetRequiredService<IConfiguration>();
+    var apiKey = configuration["DeepL:ApiKey"]; // Add your DeepL API key to appsettings.json
+    return new DeepLTranslationService(httpClient, apiKey);
+});
 
 var app = builder.Build();
 

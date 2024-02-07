@@ -17,7 +17,7 @@ function BookmarkId() {
   const [bookmark, setBookmark] = useState(null);
   const { isDarkMode } = useDarkMode();
   const [loading, setLoading] = useState(true);
-
+  const [translatedText, setTranslatedText] = useState(null);
   const [summaryResult, setSummaryResult] = useState(null);
   const [summaryPercent, setSummaryPercent] = useState(100);
   const [selectedPercentage, setSelectedPercentage] = useState(100);
@@ -86,6 +86,39 @@ function BookmarkId() {
     }
   };
 
+  const handleTranslate = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:5092/api/Bookmark/TranslateBookmark",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: bookmark.name, // Adjust the property names accordingly
+            text: bookmark.text,
+            title: bookmark.title,
+            userId: loggedInUser,
+            targetLanguage: "hu",
+          }),
+        }
+      );
+      console.log("API Response:", response.status, response.statusText);
+      const responseData = await response.json();
+      console.log("Response Data:", responseData);
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Translation and Save successful:", data.BookmarkId);
+        // Optionally, you can update the UI or take any other action based on the response.
+      } else {
+        console.error("Error in Translation and Save:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error translating and saving bookmark:", error.message);
+    }
+  };
+
   const handleSummarization = async () => {
     const url =
       "https://text-analysis12.p.rapidapi.com/summarize-text/api/v1.1";
@@ -148,6 +181,7 @@ function BookmarkId() {
             </Dropdown.Toggle>
 
             <Dropdown.Menu>
+              <Dropdown.Item onClick={handleTranslate}>Translate</Dropdown.Item>
               <Dropdown.Item onClick={handleDropdownSelection}>
                 {summaryResult ? "Show original text" : "Summarize"}
               </Dropdown.Item>
