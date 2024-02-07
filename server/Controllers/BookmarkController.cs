@@ -21,7 +21,6 @@ namespace server.Controllers
         private readonly ApplicationDbContext _dbContext;
         private readonly DeepLTranslationService _translationService;
         private readonly IConfiguration _configuration;
-        private readonly string _deepLApiKey;
 
         public BookmarkController(IBookmarkService bookmarkService, UserManager<User> userManager,
             ApplicationDbContext dbContext, DeepLTranslationService translationService, IConfiguration configuration)
@@ -31,7 +30,6 @@ namespace server.Controllers
             _dbContext = dbContext;
             _translationService = translationService;
             _configuration = configuration;
-            _deepLApiKey = _configuration["DeepL:ApiKey"];
         }
 
         [HttpGet("GetBookmarks/{userId}")]
@@ -111,55 +109,12 @@ namespace server.Controllers
         {
             try
             {
-                // Construct the translation request object
-                var translationRequest = new
-                {
-                    text = request.Text,
-                    targetLanguage = targetLanguage
-                };
-
-                // Serialize the request object to JSON
-                var jsonRequest = JsonConvert.SerializeObject(translationRequest);
-
-                // Create a new HttpClient instance
-                using (var httpClient = new HttpClient())
-                {
-                    // Set the required headers
-                    httpClient.DefaultRequestHeaders.Add("Content-Type", "application/json");
-                    httpClient.DefaultRequestHeaders.Add("Authorization", $"DeepL-Auth-Key {_deepLApiKey}");
-
-                    // Send the POST request to the DeepL translation API
-                    var response = await httpClient.PostAsync("https://api.deepl.com/v2/translate",
-                        new StringContent(jsonRequest, Encoding.UTF8, "application/json"));
-
-                    // Check if the request was successful
-                    if (response.IsSuccessStatusCode)
-                    {
-                        // Read the response content
-                        var jsonResponse = await response.Content.ReadAsStringAsync();
-
-                        // Deserialize the response JSON
-                        var translationResponse = JsonConvert.DeserializeObject<JObject>(jsonResponse);
-
-                        // Extract the translated text from the response
-                        var translatedText = translationResponse["translations"]?[0]?["text"]?.ToString();
-
-                        // Return the translated text to the client
-                        return Ok(new { TranslatedText = translatedText });
-                    }
-                    else
-                    {
-                        // Return a BadRequest response with the reason phrase
-                        return BadRequest($"Translation failed: {response.ReasonPhrase}");
-                    }
-                }
+                var translatedText = await _translationService.TranslateAsync(request.Text, targetLanguage);
+                return Ok(new { TranslatedText = translatedText });
             }
             catch (Exception ex)
             {
-                // Log any exceptions that occur during translation
                 Console.Error.WriteLine($"Error translating bookmark: {ex.Message}");
-
-                // Return a StatusCode 500 response for internal server errors
                 return StatusCode(500, "Internal Server Error");
             }
         }
