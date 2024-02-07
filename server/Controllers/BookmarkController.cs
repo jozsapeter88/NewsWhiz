@@ -1,14 +1,10 @@
-﻿using System.Text;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using server.Areas.Identity.Data.Models;
 using server.Models;
 using server.Models.DBContext;
 using server.Services;
-using Microsoft.Extensions.Configuration;
 
 namespace server.Controllers
 {
@@ -105,11 +101,11 @@ namespace server.Controllers
         }
 
         [HttpPost("TranslateBookmark")]
-        public async Task<IActionResult> TranslateBookmark([FromBody] BookmarkRequest request, string targetLanguage)
+        public async Task<IActionResult> TranslateBookmark([FromBody] BookmarkRequest request, string target_lang)
         {
             try
             {
-                var translatedText = await _translationService.TranslateAsync(request.Text, targetLanguage);
+                var translatedText = await _translationService.TranslateAsync(request.Text, target_lang);
                 return Ok(new { TranslatedText = translatedText });
             }
             catch (Exception ex)

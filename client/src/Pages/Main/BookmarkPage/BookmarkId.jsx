@@ -9,6 +9,7 @@ import { IoCaretBack } from "react-icons/io5";
 import { HiOutlineDotsHorizontal } from "react-icons/hi";
 import Button from "react-bootstrap/esm/Button";
 import { useAuth } from "../../../Contexts/AuthContext";
+import BookmarkTranslateModal from "./BookmarkTranslateModal";
 
 function BookmarkId() {
   const { user } = useAuth();
@@ -21,6 +22,8 @@ function BookmarkId() {
   const [summaryResult, setSummaryResult] = useState(null);
   const [summaryPercent, setSummaryPercent] = useState(100);
   const [selectedPercentage, setSelectedPercentage] = useState(100);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState('');
 
   useEffect(() => {
     if (isDarkMode) {
@@ -60,6 +63,50 @@ function BookmarkId() {
     }
   };
 
+  const handleTranslateClick = () => {
+    setShowModal(true);
+  };
+
+  const handleLanguageSelect = (languageCode) => {
+    setSelectedLanguage(languageCode);
+    setShowModal(false);
+    // Call translation function with selected language
+    translateText(selectedLanguage);
+  };
+
+  const translateText = async(languageCode) => {
+    try {
+      const response = await fetch(
+        "http://localhost:5092/api/Bookmark/TranslateBookmark",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: bookmark.name, // Adjust the property names accordingly
+            text: bookmark.text,
+            title: bookmark.title,
+            userId: loggedInUser,
+            target_lang: languageCode,
+          }),
+        }
+      );
+      console.log("API Response:", response.status, response.statusText);
+      const responseData = await response.json();
+      console.log("Response Data:", responseData);
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Translation and Save successful:", data.BookmarkId);
+        // Optionally, you can update the UI or take any other action based on the response.
+      } else {
+        console.error("Error in Translation and Save:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error translating and saving bookmark:", error.message);
+    }
+  };
+
   const saveSummarizedText = async () => {
     try {
       const response = await fetch(`http://localhost:5092/api/Bookmark/${id}`, {
@@ -83,39 +130,6 @@ function BookmarkId() {
       }
     } catch (error) {
       console.error("Error saving summarized text:", error);
-    }
-  };
-
-  const handleTranslate = async () => {
-    try {
-      const response = await fetch(
-        "http://localhost:5092/api/Bookmark/TranslateBookmark",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: bookmark.name, // Adjust the property names accordingly
-            text: bookmark.text,
-            title: bookmark.title,
-            userId: loggedInUser,
-            targetLanguage: "hu",
-          }),
-        }
-      );
-      console.log("API Response:", response.status, response.statusText);
-      const responseData = await response.json();
-      console.log("Response Data:", responseData);
-      if (response.ok) {
-        const data = await response.json();
-        console.log("Translation and Save successful:", data.BookmarkId);
-        // Optionally, you can update the UI or take any other action based on the response.
-      } else {
-        console.error("Error in Translation and Save:", response.statusText);
-      }
-    } catch (error) {
-      console.error("Error translating and saving bookmark:", error.message);
     }
   };
 
@@ -181,7 +195,7 @@ function BookmarkId() {
             </Dropdown.Toggle>
 
             <Dropdown.Menu>
-              <Dropdown.Item onClick={handleTranslate}>Translate</Dropdown.Item>
+              <Dropdown.Item onClick={handleTranslateClick}>Translate</Dropdown.Item>
               <Dropdown.Item onClick={handleDropdownSelection}>
                 {summaryResult ? "Show original text" : "Summarize"}
               </Dropdown.Item>
@@ -191,6 +205,11 @@ function BookmarkId() {
             </Dropdown.Menu>
           </Dropdown>
         </div>
+        <BookmarkTranslateModal
+        show={showModal}
+        onHide={() => setShowModal(false)}
+        onLanguageSelect={handleLanguageSelect}
+      />
       </div>
       <div className={`page-container ${isDarkMode ? "dark-mode" : ""}`}>
         {loading ? (
