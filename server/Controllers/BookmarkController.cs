@@ -15,16 +15,14 @@ namespace server.Controllers
         private readonly IBookmarkService _bookmarkService;
         private readonly UserManager<User> _userManager;
         private readonly ApplicationDbContext _dbContext;
-        private readonly DeepLTranslationService _translationService;
         private readonly IConfiguration _configuration;
 
         public BookmarkController(IBookmarkService bookmarkService, UserManager<User> userManager,
-            ApplicationDbContext dbContext, DeepLTranslationService translationService, IConfiguration configuration)
+            ApplicationDbContext dbContext, IConfiguration configuration)
         {
             _bookmarkService = bookmarkService;
             _userManager = userManager;
             _dbContext = dbContext;
-            _translationService = translationService;
             _configuration = configuration;
         }
 
@@ -96,21 +94,6 @@ namespace server.Controllers
             catch (Exception ex)
             {
                 Console.Error.WriteLine($"Error updating bookmark: {ex.Message}");
-                return StatusCode(500, "Internal Server Error");
-            }
-        }
-
-        [HttpPost("TranslateBookmark")]
-        public async Task<IActionResult> TranslateBookmark([FromBody] BookmarkRequest request, string target_lang)
-        {
-            try
-            {
-                var translatedText = await _translationService.TranslateAsync(request.Text, target_lang);
-                return Ok(new { TranslatedText = translatedText });
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Error translating bookmark: {ex.Message}");
                 return StatusCode(500, "Internal Server Error");
             }
         }

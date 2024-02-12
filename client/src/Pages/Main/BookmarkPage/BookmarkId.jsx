@@ -77,18 +77,16 @@ function BookmarkId() {
   const translateText = async(languageCode) => {
     try {
       const response = await fetch(
-        "http://localhost:5092/api/Bookmark/TranslateBookmark",
+        "http://localhost:5092/api/Translation",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            name: bookmark.name, // Adjust the property names accordingly
             text: bookmark.text,
-            title: bookmark.title,
-            userId: loggedInUser,
-            target_lang: languageCode,
+            sourceLanguage: "EN",
+            targetLanguage: "HU",
           }),
         }
       );
@@ -98,7 +96,6 @@ function BookmarkId() {
       if (response.ok) {
         const data = await response.json();
         console.log("Translation and Save successful:", data.BookmarkId);
-        // Optionally, you can update the UI or take any other action based on the response.
       } else {
         console.error("Error in Translation and Save:", response.statusText);
       }
@@ -116,14 +113,13 @@ function BookmarkId() {
         },
         body: JSON.stringify({
           text: summaryResult,
-          userId: loggedInUser, // Assuming you have user authentication
+          userId: loggedInUser,
         }),
       });
 
       if (response.ok) {
         console.log("Summarized text saved successfully.");
         window.alert("Summarized text saved successfully!");
-        // Optionally, you can navigate to another page or update the UI as needed.
       } else {
         const errorData = await response.json();
         console.error("Error saving summarized text:", errorData.errors);
