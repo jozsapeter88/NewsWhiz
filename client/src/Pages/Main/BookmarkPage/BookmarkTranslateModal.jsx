@@ -80,7 +80,7 @@ const TranslateModal = ({ onLanguageSelect, onHide, show }) => {
                 transition: "transform 0.3s",
               }}
               onMouseEnter={(e) => {
-                e.target.style.transform = "scale(1.15)";
+                e.target.style.transform = "scale(1.05)";
               }}
               onMouseLeave={(e) => {
                 e.target.style.transform = "scale(1)";

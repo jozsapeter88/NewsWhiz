@@ -20,16 +20,14 @@ namespace server.Controllers
         [HttpPost]
         public async Task<IActionResult> TranslateText([FromBody] TranslationRequest request)
         {
-            var apiUrl = "https://api-free.deepl.com/v2/translate";
+            var apiUrl = "http://192.168.0.159:5000/translate"; // Update with the correct API endpoint
 
             var requestBody = new
             {
-                text = request.Text,
-                target_lang = request.TargetLanguage
+                q = request.Text,
+                source = request.SourceLanguage,
+                target = request.TargetLanguage,
             };
-
-            _httpClient.DefaultRequestHeaders.Add("Authorization",
-                "DeepL-Auth-Key ce5d753d-20fd-6b84-b63d-14e10d5a5cb4:fx");
 
             var jsonRequest = JsonConvert.SerializeObject(requestBody);
             var content = new StringContent(jsonRequest, System.Text.Encoding.UTF8, "application/json");
@@ -40,7 +38,7 @@ namespace server.Controllers
             var jsonResponse = await response.Content.ReadAsStringAsync();
             var translationResponse = JsonConvert.DeserializeObject<TranslationResponse>(jsonResponse);
 
-            return Ok(translationResponse.Translations[0].Text);
+            return Ok(translationResponse.TranslatedText);
         }
     }
 
@@ -53,11 +51,6 @@ namespace server.Controllers
 
     public class TranslationResponse
     {
-        public DeepLTranslation[] Translations { get; set; }
-    }
-
-    public class DeepLTranslation
-    {
-        public string Text { get; set; }
+        public string TranslatedText { get; set; }
     }
 }
