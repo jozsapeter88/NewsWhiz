@@ -20,7 +20,7 @@ namespace server.Controllers
         [HttpPost]
         public async Task<IActionResult> TranslateText([FromBody] TranslationRequest request)
         {
-            var apiUrl = "http://192.168.0.159:5000/translate"; // Update with the correct API endpoint
+            var apiUrl = "http://localhost:5000/translate"; // Update with the correct API endpoint
 
             var requestBody = new
             {
@@ -36,9 +36,12 @@ namespace server.Controllers
             response.EnsureSuccessStatusCode();
 
             var jsonResponse = await response.Content.ReadAsStringAsync();
+            
+            // Deserialize the string response from the API to JSON
             var translationResponse = JsonConvert.DeserializeObject<TranslationResponse>(jsonResponse);
 
-            return Ok(translationResponse.TranslatedText);
+            // Return the JSON response to the frontend
+            return Ok(translationResponse);
         }
     }
 
