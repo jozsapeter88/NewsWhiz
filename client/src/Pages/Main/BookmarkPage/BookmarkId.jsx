@@ -23,7 +23,7 @@ function BookmarkId() {
   const [summaryPercent, setSummaryPercent] = useState(100);
   const [selectedPercentage, setSelectedPercentage] = useState(100);
   const [showModal, setShowModal] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState('');
+  const [selectedLanguage, setSelectedLanguage] = useState("");
 
   useEffect(() => {
     if (isDarkMode) {
@@ -70,39 +70,36 @@ function BookmarkId() {
   const handleLanguageSelect = (languageCode) => {
     setSelectedLanguage(languageCode);
     setShowModal(false);
-    // Call translation function with selected language
-    translateText(selectedLanguage);
+    translateText(languageCode);
   };
 
-  const translateText = async(languageCode) => {
+  const translateText = async (languageCode) => {
     try {
-      const response = await fetch(
-        "http://localhost:5092/api/Translation",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            text: bookmark.text,
-            sourceLanguage: "EN",
-            targetLanguage: "HU",
-          }),
-        }
-      );
+      const response = await fetch("http://localhost:5092/api/Translation", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text: bookmark.text,
+          sourceLanguage: "en",
+          targetLanguage: languageCode.toLowerCase(),
+        }),
+      });
       console.log("API Response:", response.status, response.statusText);
       const responseData = await response.json();
       console.log("Response Data:", responseData);
       if (response.ok) {
-        const data = await response.json();
-        console.log("Translation and Save successful:", data.BookmarkId);
+        setTranslatedText(responseData.translatedText); // Update translated text state
+        console.log("Translation successful:", responseData.translatedText);
       } else {
-        console.error("Error in Translation and Save:", response.statusText);
+        console.error("Error in Translation:", responseData.error);
       }
     } catch (error) {
-      console.error("Error translating and saving bookmark:", error.message);
+      console.error("Error translating text:", error.message);
     }
   };
+  
 
   const saveSummarizedText = async () => {
     try {
@@ -191,7 +188,9 @@ function BookmarkId() {
             </Dropdown.Toggle>
 
             <Dropdown.Menu>
-              <Dropdown.Item onClick={handleTranslateClick}>Translate</Dropdown.Item>
+              <Dropdown.Item onClick={handleTranslateClick}>
+                Translate
+              </Dropdown.Item>
               <Dropdown.Item onClick={handleDropdownSelection}>
                 {summaryResult ? "Show original text" : "Summarize"}
               </Dropdown.Item>
@@ -202,10 +201,10 @@ function BookmarkId() {
           </Dropdown>
         </div>
         <BookmarkTranslateModal
-        show={showModal}
-        onHide={() => setShowModal(false)}
-        onLanguageSelect={handleLanguageSelect}
-      />
+          show={showModal}
+          onHide={() => setShowModal(false)}
+          onLanguageSelect={handleLanguageSelect}
+        />
       </div>
       <div className={`page-container ${isDarkMode ? "dark-mode" : ""}`}>
         {loading ? (
@@ -237,17 +236,23 @@ function BookmarkId() {
                   </Card.Title>
                 </Card.Body>
               </Card>
+
               <Card className="w-50 mx-auto">
                 <Card.Body>
-                  {summaryResult !== null ? (
-                    <Card.Text>{summaryResult}</Card.Text>
-                  ) : (
-                    <Card.Text>
-                      {bookmark?.text || "No text available"}
-                    </Card.Text>
-                  )}
+                  <Card.Title>Original Text</Card.Title>
+                  <Card.Text>{bookmark?.text || "No text available"}</Card.Text>
                 </Card.Body>
               </Card>
+
+              {translatedText !== null && (
+                <Card className="w-50 mx-auto mt-4">
+                  <Card.Body>
+                    <Card.Title>Translated Text</Card.Title>
+                    <Card.Text>{translatedText}</Card.Text>
+                  </Card.Body>
+                </Card>
+              )}
+
               <Button
                 variant="success"
                 onClick={saveSummarizedText}
