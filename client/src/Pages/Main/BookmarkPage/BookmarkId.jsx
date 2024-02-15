@@ -24,6 +24,7 @@ function BookmarkId() {
   const [selectedPercentage, setSelectedPercentage] = useState(100);
   const [showModal, setShowModal] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState("");
+  const [translationDisplayed, setTranslationDisplayed] = useState(false);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -90,7 +91,8 @@ function BookmarkId() {
       const responseData = await response.json();
       console.log("Response Data:", responseData);
       if (response.ok) {
-        setTranslatedText(responseData.translatedText); // Update translated text state
+        setTranslatedText(responseData.translatedText);
+        setTranslationDisplayed(true);
         console.log("Translation successful:", responseData.translatedText);
       } else {
         console.error("Error in Translation:", responseData.error);
@@ -99,7 +101,6 @@ function BookmarkId() {
       console.error("Error translating text:", error.message);
     }
   };
-  
 
   const saveSummarizedText = async () => {
     try {
@@ -191,9 +192,11 @@ function BookmarkId() {
               <Dropdown.Item onClick={handleTranslateClick}>
                 Translate
               </Dropdown.Item>
+              <Link to="/bookmarkSummarize">
               <Dropdown.Item onClick={handleDropdownSelection}>
                 {summaryResult ? "Show original text" : "Summarize"}
               </Dropdown.Item>
+              </Link>
               <Dropdown.Item as={Link} to={`/bookmarkEdit/${id}`}>
                 Edit
               </Dropdown.Item>
@@ -258,7 +261,7 @@ function BookmarkId() {
                 onClick={saveSummarizedText}
                 style={{ marginTop: "5vh" }}
               >
-                Save
+                {translationDisplayed ? "Save translated text" : "Save"}
               </Button>
             </div>
           </>
