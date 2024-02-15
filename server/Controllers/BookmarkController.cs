@@ -15,13 +15,15 @@ namespace server.Controllers
         private readonly IBookmarkService _bookmarkService;
         private readonly UserManager<User> _userManager;
         private readonly ApplicationDbContext _dbContext;
+        private readonly IConfiguration _configuration;
 
         public BookmarkController(IBookmarkService bookmarkService, UserManager<User> userManager,
-            ApplicationDbContext dbContext)
+            ApplicationDbContext dbContext, IConfiguration configuration)
         {
             _bookmarkService = bookmarkService;
             _userManager = userManager;
             _dbContext = dbContext;
+            _configuration = configuration;
         }
 
         [HttpGet("GetBookmarks/{userId}")]
@@ -79,10 +81,10 @@ namespace server.Controllers
 
                 if (existingBookmark == null)
                 {
-                    return NotFound(); // Bookmark with the given ID not found
+                    return NotFound();
                 }
 
-                // Update the existing bookmark's text property
+
                 existingBookmark.Text = request.Text;
 
                 await _dbContext.SaveChangesAsync();

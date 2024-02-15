@@ -9,6 +9,7 @@ import { IoCaretBack } from "react-icons/io5";
 import { HiOutlineDotsHorizontal } from "react-icons/hi";
 import Button from "react-bootstrap/esm/Button";
 import { useAuth } from "../../../Contexts/AuthContext";
+import BookmarkTranslateModal from "./BookmarkTranslateModal";
 
 function BookmarkId() {
   const { user } = useAuth();
@@ -17,10 +18,13 @@ function BookmarkId() {
   const [bookmark, setBookmark] = useState(null);
   const { isDarkMode } = useDarkMode();
   const [loading, setLoading] = useState(true);
-
+  const [translatedText, setTranslatedText] = useState(null);
   const [summaryResult, setSummaryResult] = useState(null);
   const [summaryPercent, setSummaryPercent] = useState(100);
   const [selectedPercentage, setSelectedPercentage] = useState(100);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState("");
+  const [translationDisplayed, setTranslationDisplayed] = useState(false);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -60,6 +64,44 @@ function BookmarkId() {
     }
   };
 
+  const handleTranslateClick = () => {
+    setShowModal(true);
+  };
+
+  const handleLanguageSelect = (languageCode) => {
+    setSelectedLanguage(languageCode);
+    setShowModal(false);
+    translateText(languageCode);
+  };
+
+  const translateText = async (languageCode) => {
+    try {
+      const response = await fetch("http://localhost:5092/api/Translation", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text: bookmark.text,
+          sourceLanguage: "en",
+          targetLanguage: languageCode.toLowerCase(),
+        }),
+      });
+      console.log("API Response:", response.status, response.statusText);
+      const responseData = await response.json();
+      console.log("Response Data:", responseData);
+      if (response.ok) {
+        setTranslatedText(responseData.translatedText);
+        setTranslationDisplayed(true);
+        console.log("Translation successful:", responseData.translatedText);
+      } else {
+        console.error("Error in Translation:", responseData.error);
+      }
+    } catch (error) {
+      console.error("Error translating text:", error.message);
+    }
+  };
+
   const saveSummarizedText = async () => {
     try {
       const response = await fetch(`http://localhost:5092/api/Bookmark/${id}`, {
@@ -69,14 +111,13 @@ function BookmarkId() {
         },
         body: JSON.stringify({
           text: summaryResult,
-          userId: loggedInUser, // Assuming you have user authentication
+          userId: loggedInUser,
         }),
       });
 
       if (response.ok) {
         console.log("Summarized text saved successfully.");
         window.alert("Summarized text saved successfully!");
-        // Optionally, you can navigate to another page or update the UI as needed.
       } else {
         const errorData = await response.json();
         console.error("Error saving summarized text:", errorData.errors);
@@ -148,15 +189,25 @@ function BookmarkId() {
             </Dropdown.Toggle>
 
             <Dropdown.Menu>
+              <Dropdown.Item onClick={handleTranslateClick}>
+                Translate
+              </Dropdown.Item>
+              <Link to="/bookmarkSummarize">
               <Dropdown.Item onClick={handleDropdownSelection}>
                 {summaryResult ? "Show original text" : "Summarize"}
               </Dropdown.Item>
+              </Link>
               <Dropdown.Item as={Link} to={`/bookmarkEdit/${id}`}>
                 Edit
               </Dropdown.Item>
             </Dropdown.Menu>
           </Dropdown>
         </div>
+        <BookmarkTranslateModal
+          show={showModal}
+          onHide={() => setShowModal(false)}
+          onLanguageSelect={handleLanguageSelect}
+        />
       </div>
       <div className={`page-container ${isDarkMode ? "dark-mode" : ""}`}>
         {loading ? (
@@ -188,23 +239,29 @@ function BookmarkId() {
                   </Card.Title>
                 </Card.Body>
               </Card>
+
               <Card className="w-50 mx-auto">
                 <Card.Body>
-                  {summaryResult !== null ? (
-                    <Card.Text>{summaryResult}</Card.Text>
-                  ) : (
-                    <Card.Text>
-                      {bookmark?.text || "No text available"}
-                    </Card.Text>
-                  )}
+                  <Card.Title>Original Text</Card.Title>
+                  <Card.Text>{bookmark?.text || "No text available"}</Card.Text>
                 </Card.Body>
               </Card>
+
+              {translatedText !== null && (
+                <Card className="w-50 mx-auto mt-4">
+                  <Card.Body>
+                    <Card.Title>Translated Text</Card.Title>
+                    <Card.Text>{translatedText}</Card.Text>
+                  </Card.Body>
+                </Card>
+              )}
+
               <Button
                 variant="success"
                 onClick={saveSummarizedText}
                 style={{ marginTop: "5vh" }}
               >
-                Save
+                {translationDisplayed ? "Save translated text" : "Save"}
               </Button>
             </div>
           </>
