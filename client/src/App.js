@@ -10,6 +10,7 @@ import { DarkModeProvider } from "./Contexts/DarkModeContext";
 import BookmarkPage from "./Pages/Main/BookmarkPage/BookmarkPage";
 import BookmarkId from "./Pages/Main/BookmarkPage/BookmarkId";
 import BookmarkEdit from "./Pages/Main/BookmarkPage/BookmarkEdit";
+import BookmarkSummary from "./Pages/Main/BookmarkPage/BookmarkSummary";
 
 function App() {
   const { user, login } = useAuth();
@@ -33,8 +34,10 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegistrationForm />} />
           <Route path="/bookmarks" element={<BookmarkPage />} />
+          <Route path="/bookmarkId/:id" element={<BookmarkId />} />
           <Route path="/bookmark/:id" element={<BookmarkId />} />
           <Route path="/bookmarkEdit/:id" element={<BookmarkEdit />} />
+          <Route path="/bookmarkSummary/:id" element={<BookmarkSummary />} />
         </Routes>
       </DarkModeProvider>
     </div>

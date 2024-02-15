@@ -9,4 +9,6 @@ public interface IBookmarkService
     Task<IEnumerable<Bookmark>> GetBookmarksAsync(string userId);
     Task<Bookmark> GetBookmarkByIdAsync(int id);
     Task<bool> EditBookmarkAsync(int id, BookmarkEditRequest request, string userId);
+    Task<bool> UpdateTranslatedTextAsync(int id, string translatedText);
+
 }

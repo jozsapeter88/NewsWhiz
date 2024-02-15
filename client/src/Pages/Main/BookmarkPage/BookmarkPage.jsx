@@ -11,7 +11,6 @@ function BookmarkPage() {
   const { user } = useAuth();
   const [bookmarks, setBookmarks] = useState([]);
   const { isDarkMode } = useDarkMode();
-
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [selectedBookmark, setSelectedBookmark] = useState(null);
 
@@ -26,6 +25,7 @@ function BookmarkPage() {
   useEffect(() => {
     const fetchBookmarks = async () => {
       try {
+        if (!user) return; // Return early if user is null
         const response = await fetch(
           `http://localhost:5092/api/Bookmark/GetBookmarks/${user.id}`
         );
@@ -39,11 +39,9 @@ function BookmarkPage() {
         console.error("Error fetching bookmarks:", error);
       }
     };
-
-    if (user.id) {
-      fetchBookmarks();
-    }
-  }, [user.id]);
+  
+    fetchBookmarks();
+  }, [user]);
 
   const truncateText = (text, maxLength) => {
     if (text.length <= maxLength) {

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Modal, Form } from "react-bootstrap";
+import { Modal, Form } from "react-bootstrap";
 
 const TranslateModal = ({ onLanguageSelect, onHide, show }) => {
   const languages = [

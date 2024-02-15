@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Dropdown, Form, Card } from "react-bootstrap";
+import { Dropdown, Card } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import TopNavbar from "../../../Components/TopNavbar";
 import { useDarkMode } from "../../../Contexts/DarkModeContext";
@@ -10,11 +10,12 @@ import { HiOutlineDotsHorizontal } from "react-icons/hi";
 import Button from "react-bootstrap/esm/Button";
 import { useAuth } from "../../../Contexts/AuthContext";
 import BookmarkTranslateModal from "./BookmarkTranslateModal";
+import CustomSpinner from "../../../Components/CustomSpinner";
 
 function BookmarkId() {
   const { user } = useAuth();
   const { id } = useParams();
-  const loggedInUser = user.id;
+  const loggedInUser = user ? user.id : null;
   const [bookmark, setBookmark] = useState(null);
   const { isDarkMode } = useDarkMode();
   const [loading, setLoading] = useState(true);
@@ -56,14 +57,6 @@ function BookmarkId() {
     fetchBookmark();
   }, [id]);
 
-  const handleDropdownSelection = async () => {
-    if (!summaryResult) {
-      await handleSummarization();
-    } else {
-      setSummaryResult(null);
-    }
-  };
-
   const handleTranslateClick = () => {
     setShowModal(true);
   };
@@ -76,6 +69,7 @@ function BookmarkId() {
 
   const translateText = async (languageCode) => {
     try {
+      setLoading(true);
       const response = await fetch("http://localhost:5092/api/Translation", {
         method: "POST",
         headers: {
@@ -99,10 +93,12 @@ function BookmarkId() {
       }
     } catch (error) {
       console.error("Error translating text:", error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const saveSummarizedText = async () => {
+  const saveTranslatedText = async () => {
     try {
       const response = await fetch(`http://localhost:5092/api/Bookmark/${id}`, {
         method: "PUT",
@@ -110,63 +106,22 @@ function BookmarkId() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          text: summaryResult,
+          text: translatedText,
           userId: loggedInUser,
         }),
       });
 
       if (response.ok) {
-        console.log("Summarized text saved successfully.");
-        window.alert("Summarized text saved successfully!");
+        console.log("Translated text saved successfully.");
+        window.alert("Translated text saved successfully!");
+        window.location.reload();
       } else {
         const errorData = await response.json();
-        console.error("Error saving summarized text:", errorData.errors);
+        console.error("Error saving translated text:", errorData.errors);
       }
     } catch (error) {
-      console.error("Error saving summarized text:", error);
+      console.error("Error saving translated text:", error);
     }
-  };
-
-  const handleSummarization = async () => {
-    const url =
-      "https://text-analysis12.p.rapidapi.com/summarize-text/api/v1.1";
-    const options = {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "X-RapidAPI-Key": "21ab335ba4msh85f8c88bb6ae3f6p14ac31jsn78a47852eb0d",
-        "X-RapidAPI-Host": "text-analysis12.p.rapidapi.com",
-      },
-      body: JSON.stringify({
-        language: "english",
-        summary_percent: summaryPercent,
-        text: bookmark.text,
-      }),
-    };
-
-    try {
-      const response = await fetch(url, options);
-      const result = await response.json();
-
-      if (response.ok) {
-        await setSummaryResult(result.summary);
-      } else {
-        console.error("Error in summarization:", result.msg);
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const handleSliderChange = (event) => {
-    const value = parseInt(event.target.value, 10);
-    const roundedValue = Math.round(value / 10) * 10;
-    setSelectedPercentage(roundedValue);
-  };
-
-  const handleOkButtonClick = () => {
-    setSummaryPercent(selectedPercentage);
-    handleSummarization();
   };
 
   return (
@@ -178,6 +133,7 @@ function BookmarkId() {
             <IoCaretBack />
           </Button>
         </Link>
+        {loading && <CustomSpinner />}
         <h2 className="bookmarkName">
           {bookmark ? <p>{bookmark.name}</p> : <p>Loading...</p>}
         </h2>
@@ -192,11 +148,9 @@ function BookmarkId() {
               <Dropdown.Item onClick={handleTranslateClick}>
                 Translate
               </Dropdown.Item>
-              <Link to="/bookmarkSummarize">
-              <Dropdown.Item onClick={handleDropdownSelection}>
-                {summaryResult ? "Show original text" : "Summarize"}
+              <Dropdown.Item as={Link} to={`/bookmarkSummary/${id}`}>
+                {"Summarize"}
               </Dropdown.Item>
-              </Link>
               <Dropdown.Item as={Link} to={`/bookmarkEdit/${id}`}>
                 Edit
               </Dropdown.Item>
@@ -211,38 +165,20 @@ function BookmarkId() {
       </div>
       <div className={`page-container ${isDarkMode ? "dark-mode" : ""}`}>
         {loading ? (
-          <p>Loading...</p>
+          <CustomSpinner />
         ) : (
           <>
-            {/* Slider for summary percentage */}
-            {summaryResult && (
-              <Form className="summary-slider, mb-3 w-50 mx-auto">
-                <Form.Label>
-                  Summary Percentage: {selectedPercentage}%
-                </Form.Label>
-                <Form.Range
-                  value={selectedPercentage}
-                  onChange={handleSliderChange}
-                  min={10}
-                  max={100}
-                />
-                <Button variant="primary" onClick={handleOkButtonClick}>
-                  Ok
-                </Button>
-              </Form>
-            )}
             <div>
               <Card className="mb-3 w-50 mx-auto">
                 <Card.Body>
                   <Card.Title className="textTitle">
-                    {bookmark ? <p>{bookmark.title}</p> : <p>Loading...</p>}
+                    {bookmark.title}
                   </Card.Title>
                 </Card.Body>
               </Card>
 
               <Card className="w-50 mx-auto">
                 <Card.Body>
-                  <Card.Title>Original Text</Card.Title>
                   <Card.Text>{bookmark?.text || "No text available"}</Card.Text>
                 </Card.Body>
               </Card>
@@ -256,13 +192,15 @@ function BookmarkId() {
                 </Card>
               )}
 
-              <Button
-                variant="success"
-                onClick={saveSummarizedText}
-                style={{ marginTop: "5vh" }}
-              >
-                {translationDisplayed ? "Save translated text" : "Save"}
-              </Button>
+              {translationDisplayed && (
+                <Button
+                  variant="success"
+                  onClick={saveTranslatedText}
+                  style={{ marginTop: "5vh" }}
+                >
+                  Save translated text
+                </Button>
+              )}
             </div>
           </>
         )}
