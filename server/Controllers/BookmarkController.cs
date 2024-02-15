@@ -97,5 +97,28 @@ namespace server.Controllers
                 return StatusCode(500, "Internal Server Error");
             }
         }
+        
+        [HttpPut("UpdateTranslatedText/{id}")]
+        public async Task<IActionResult> UpdateTranslatedText(int id, [FromBody] TranslationRequest request)
+        {
+            try
+            {
+                var success = await _bookmarkService.UpdateTranslatedTextAsync(id, request.Text);
+
+                if (success)
+                {
+                    return Ok(new { Message = "Translated text updated successfully" });
+                }
+                else
+                {
+                    return NotFound(); // Bookmark with the given ID not found
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error updating translated text: {ex.Message}");
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
     }
 }
