@@ -20,7 +20,7 @@ namespace server.Controllers
         [HttpPost]
         public async Task<IActionResult> SummarizeText([FromBody] SummarizeRequest request)
         {
-            var apiUrl = "https://text-analysis12.p.rapidapi.com/summarize-text/api/v1.1"; // Update with the correct API endpoint
+            var apiUrl = "https://text-analysis12.p.rapidapi.com/summarize-text/api/v1.1";
 
             var requestBody = new
             {
@@ -34,7 +34,7 @@ namespace server.Controllers
 
             try
             {
-                var apiKey = "YOUR_API_KEY"; // Replace with your RapidAPI key
+                var apiKey = "21ab335ba4msh85f8c88bb6ae3f6p14ac31jsn78a47852eb0d"; // Replace with your RapidAPI key
                 _httpClient.DefaultRequestHeaders.Add("X-RapidAPI-Key", apiKey);
                 _httpClient.DefaultRequestHeaders.Add("X-RapidAPI-Host", "text-analysis12.p.rapidapi.com");
 

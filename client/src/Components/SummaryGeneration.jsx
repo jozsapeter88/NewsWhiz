@@ -21,11 +21,10 @@ const SummaryComponent = ({toggleAccordion, activeAccordion, cleanedArticle}) =>
         }
     
         const data = await response.json();
-        return data.summary; // Assuming the backend response contains the summarized text
+        setSummaryResult(data.summary); // Update the summaryResult state with the fetched summarized text
       } catch (error) {
         console.error('Error:', error);
         // Handle error, display error message, etc.
-        return null;
       }
     };
     
@@ -36,7 +35,7 @@ const SummaryComponent = ({toggleAccordion, activeAccordion, cleanedArticle}) =>
         <button
           onClick={() => {
             toggleAccordion(0);
-            summarizeText();
+            summarizeText(cleanedArticle, 10); // Pass the cleanedArticle and desired summary percentage
           }}
         >
           Summarize
