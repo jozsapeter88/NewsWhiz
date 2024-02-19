@@ -96,4 +96,34 @@ public class BookmarkService : IBookmarkService
             return false; // Internal Server Error
         }
     }
+    
+    public async Task<bool> UpdateSummarizerTextAsync(int id, string text)
+    {
+        try
+        {
+            // Retrieve the existing bookmark from the database
+            var existingBookmark = await _dbContext.Bookmarks.FirstOrDefaultAsync(b => b.Id == id);
+
+            // If the bookmark does not exist, return false
+            if (existingBookmark == null)
+            {
+                return false;
+            }
+
+            // Update the summarizer text
+            existingBookmark.Text = text;
+
+            // Save the changes to the database
+            await _dbContext.SaveChangesAsync();
+
+            // Return true to indicate success
+            return true;
+        }
+        catch (Exception ex)
+        {
+            // Log any errors that occur
+            Console.Error.WriteLine($"Error updating summarizer text: {ex.Message}");
+            throw;
+        }
+    }
 }

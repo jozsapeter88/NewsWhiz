@@ -120,5 +120,29 @@ namespace server.Controllers
                 return StatusCode(500, "Internal Server Error");
             }
         }
+        
+        [HttpPut("UpdateSummarizerText/{id}")]
+        public async Task<IActionResult> UpdateSummarizerText(int id, [FromBody] SummarizeRequest request)
+        {
+            try
+            {
+                // Call the service method to update the summarizer text
+                var success = await _bookmarkService.UpdateSummarizerTextAsync(id, request.Text);
+
+                if (success)
+                {
+                    return Ok(new { Message = "Summarizer text updated successfully" });
+                }
+                else
+                {
+                    return NotFound(); // Bookmark with the given ID not found
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error updating summarizer text: {ex.Message}");
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
     }
 }
