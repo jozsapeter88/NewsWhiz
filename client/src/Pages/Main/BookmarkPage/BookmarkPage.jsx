@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import "./BookmarkPage.css";
 import { useDarkMode } from "../../../Contexts/DarkModeContext";
 import { IoCloseCircle } from "react-icons/io5";
+import TranslateModal from "./BookmarkTranslateModal";
 
 function BookmarkPage() {
   const { user } = useAuth();

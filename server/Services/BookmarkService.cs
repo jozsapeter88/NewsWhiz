@@ -7,10 +7,12 @@ namespace server.Services;
 public class BookmarkService : IBookmarkService
 {
     private readonly ApplicationDbContext _dbContext;
+    private readonly HttpClient _httpClient;
 
-    public BookmarkService(ApplicationDbContext dbContext)
+    public BookmarkService(ApplicationDbContext dbContext, HttpClient httpClient)
     {
         _dbContext = dbContext;
+        _httpClient = _httpClient;
     }
 
     public async Task<int> SaveBookmarkAsync(string name, string text, string title, string userId)
