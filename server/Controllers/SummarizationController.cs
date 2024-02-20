@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using server.Models.Summarization;
 
 namespace server.Controllers
 {
@@ -18,7 +19,7 @@ namespace server.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> SummarizeText([FromBody] SummarizeRequest request)
+        public async Task<IActionResult> SummarizeText([FromBody] SummarizationRequest request)
         {
             var apiUrl = "https://text-analysis12.p.rapidapi.com/summarize-text/api/v1.1";
 
@@ -57,16 +58,5 @@ namespace server.Controllers
                 return StatusCode(500, "Internal Server Error");
             }
         }
-    }
-
-    public class SummarizeRequest
-    {
-        public string Text { get; set; }
-        public int SummaryPercent { get; set; }
-    }
-
-    public class SummarizationResponse
-    {
-        public string Summary { get; set; }
     }
 }

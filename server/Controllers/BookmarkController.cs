@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using server.Areas.Identity.Data.Models;
 using server.Models;
 using server.Models.DBContext;
+using server.Models.Summarization;
+using server.Models.Translation;
 using server.Services;
 
 namespace server.Controllers
@@ -122,7 +124,7 @@ namespace server.Controllers
         }
         
         [HttpPut("UpdateSummarizerText/{id}")]
-        public async Task<IActionResult> UpdateSummarizerText(int id, [FromBody] SummarizeRequest request)
+        public async Task<IActionResult> UpdateSummarizerText(int id, [FromBody] SummarizationRequest request)
         {
             try
             {
@@ -145,4 +147,5 @@ namespace server.Controllers
             }
         }
     }
+    
 }

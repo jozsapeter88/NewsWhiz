@@ -1,8 +1,6 @@
-﻿using System;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using server.Models.Translation;
 
 namespace server.Controllers
 {
@@ -36,24 +34,12 @@ namespace server.Controllers
             response.EnsureSuccessStatusCode();
 
             var jsonResponse = await response.Content.ReadAsStringAsync();
-            
+
             // Deserialize the string response from the API to JSON
             var translationResponse = JsonConvert.DeserializeObject<TranslationResponse>(jsonResponse);
 
             // Return the JSON response to the frontend
             return Ok(translationResponse);
         }
-    }
-
-    public class TranslationRequest
-    {
-        public string Text { get; set; }
-        public string SourceLanguage { get; set; }
-        public string TargetLanguage { get; set; }
-    }
-
-    public class TranslationResponse
-    {
-        public string TranslatedText { get; set; }
     }
 }
