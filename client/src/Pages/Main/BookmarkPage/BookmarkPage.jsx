@@ -40,7 +40,7 @@ function BookmarkPage() {
         console.error("Error fetching bookmarks:", error);
       }
     };
-  
+
     fetchBookmarks();
   }, [user]);
 
@@ -64,26 +64,24 @@ function BookmarkPage() {
   const handleDeleteBookmark = async () => {
     try {
       console.log(`Deleting bookmark with ID: ${selectedBookmark.id}`);
-      const response = await fetch(`http://localhost:5092/api/Bookmark/${selectedBookmark.id}`, {
-        method: 'DELETE',
-      });
-  
+      const response = await fetch(
+        `http://localhost:5092/api/Bookmark/${selectedBookmark.id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
       if (response.ok) {
-        // Bookmark deleted successfully
-        // Remove the deleted bookmark from the bookmarks list
-        const updatedBookmarks = bookmarks.filter(bookmark => bookmark.id !== selectedBookmark.id);
+        const updatedBookmarks = bookmarks.filter(
+          (bookmark) => bookmark.id !== selectedBookmark.id
+        );
         setBookmarks(updatedBookmarks);
       } else {
-        // Handle error response
-        console.error('Error deleting bookmark:', response.statusText);
-        // Display an error message to the user
+        console.error("Error deleting bookmark:", response.statusText);
       }
     } catch (error) {
-      // Handle network errors
-      console.error('Error deleting bookmark:', error.message);
-      // Display an error message to the user
+      console.error("Error deleting bookmark:", error.message);
     } finally {
-      // Close the confirmation modal
       handleCloseModal();
     }
   };
