@@ -7,12 +7,10 @@ namespace server.Services;
 public class BookmarkService : IBookmarkService
 {
     private readonly ApplicationDbContext _dbContext;
-    private readonly HttpClient _httpClient;
 
-    public BookmarkService(ApplicationDbContext dbContext, HttpClient httpClient)
+    public BookmarkService(ApplicationDbContext dbContext)
     {
         _dbContext = dbContext;
-        _httpClient = _httpClient;
     }
 
     public async Task<int> SaveBookmarkAsync(string name, string text, string title, string userId)
@@ -28,34 +26,30 @@ public class BookmarkService : IBookmarkService
     {
         try
         {
-            // Check if the bookmark with the given id exists
             var existingBookmark = await _dbContext.Bookmarks.FirstOrDefaultAsync(b => b.Id == id);
 
             if (existingBookmark == null)
             {
-                return false; // Bookmark with the given ID not found
+                return false;
             }
 
-            // Ensure the UserId is the same as the current user's Id
             if (!string.IsNullOrEmpty(request.UserId) && request.UserId != userId)
             {
-                return false; // Invalid UserId
+                return false;
             }
 
-            // Only update the 'Text' property if it is different from the original
             if (!string.IsNullOrEmpty(request.Text) && existingBookmark.Text != request.Text)
             {
                 existingBookmark.Text = request.Text;
                 await _dbContext.SaveChangesAsync();
             }
 
-            return true; // Bookmark edited successfully
+            return true;
         }
         catch (Exception ex)
         {
-            // Log the error to a more comprehensive logging system
             Console.Error.WriteLine($"Error updating bookmark: {ex.Message}");
-            return false; // Internal Server Error
+            return false;
         }
     }
 
@@ -68,60 +62,74 @@ public class BookmarkService : IBookmarkService
     {
         return await _dbContext.Bookmarks.FindAsync(id);
     }
-    
-    public async Task<bool> UpdateTranslatedTextAsync(int id, string translatedText)
+
+    public async Task<bool> DeleteBookmarkAsync(int id)
     {
         try
         {
-            // Retrieve the bookmark by its ID
             var bookmark = await _dbContext.Bookmarks.FindAsync(id);
 
             if (bookmark == null)
             {
-                return false; // Bookmark with the given ID not found
+                return false;
             }
 
-            // Update the translated text
-            bookmark.Text = translatedText;
+            _dbContext.Bookmarks.Remove(bookmark);
 
-            // Save the changes to the database
             await _dbContext.SaveChangesAsync();
 
-            return true; // Translated text updated successfully
+            return true;
         }
         catch (Exception ex)
         {
-            // Log the error to a more comprehensive logging system
-            Console.Error.WriteLine($"Error updating translated text: {ex.Message}");
-            return false; // Internal Server Error
+            Console.Error.WriteLine($"Error deleting bookmark: {ex.Message}");
+            return false;
         }
     }
-    
+
+    public async Task<bool> UpdateTranslatedTextAsync(int id, string translatedText)
+    {
+        try
+        {
+            var bookmark = await _dbContext.Bookmarks.FindAsync(id);
+
+            if (bookmark == null)
+            {
+                return false;
+            }
+
+            bookmark.Text = translatedText;
+
+            await _dbContext.SaveChangesAsync();
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error updating translated text: {ex.Message}");
+            return false;
+        }
+    }
+
     public async Task<bool> UpdateSummarizerTextAsync(int id, string text)
     {
         try
         {
-            // Retrieve the existing bookmark from the database
             var existingBookmark = await _dbContext.Bookmarks.FirstOrDefaultAsync(b => b.Id == id);
 
-            // If the bookmark does not exist, return false
             if (existingBookmark == null)
             {
                 return false;
             }
 
-            // Update the summarizer text
             existingBookmark.Text = text;
 
-            // Save the changes to the database
             await _dbContext.SaveChangesAsync();
 
-            // Return true to indicate success
             return true;
         }
         catch (Exception ex)
         {
-            // Log any errors that occur
             Console.Error.WriteLine($"Error updating summarizer text: {ex.Message}");
             throw;
         }

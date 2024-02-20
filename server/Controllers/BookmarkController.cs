@@ -99,7 +99,30 @@ namespace server.Controllers
                 return StatusCode(500, "Internal Server Error");
             }
         }
-        
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteBookmark(int id)
+        {
+            try
+            {
+                var success = await _bookmarkService.DeleteBookmarkAsync(id);
+
+                if (success)
+                {
+                    return Ok(new { Message = "Bookmark deleted successfully" });
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error deleting bookmark: {ex.Message}");
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
+
         [HttpPut("UpdateTranslatedText/{id}")]
         public async Task<IActionResult> UpdateTranslatedText(int id, [FromBody] TranslationRequest request)
         {
@@ -122,7 +145,7 @@ namespace server.Controllers
                 return StatusCode(500, "Internal Server Error");
             }
         }
-        
+
         [HttpPut("UpdateSummarizerText/{id}")]
         public async Task<IActionResult> UpdateSummarizerText(int id, [FromBody] SummarizationRequest request)
         {
@@ -133,7 +156,7 @@ namespace server.Controllers
 
                 if (success)
                 {
-                    return Ok(new { Message = "Summarizer text updated successfully" });
+                    return Ok(new { Message = "Summarized text updated successfully" });
                 }
                 else
                 {
@@ -147,5 +170,4 @@ namespace server.Controllers
             }
         }
     }
-    
 }

@@ -20,7 +20,7 @@ public class LanguageDetectionController : ControllerBase
     {
         try
         {
-            var apiUrl = "http://localhost:5000/detect"; // Update with the correct API endpoint
+            var apiUrl = "http://localhost:5000/detect";
 
             var requestBody = new
             {
