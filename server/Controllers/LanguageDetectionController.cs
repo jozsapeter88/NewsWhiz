@@ -34,9 +34,9 @@ public class LanguageDetectionController : ControllerBase
             response.EnsureSuccessStatusCode();
 
             var jsonResponse = await response.Content.ReadAsStringAsync();
-            var detectionResult = JsonConvert.DeserializeObject<LanguageDetectionResult>(jsonResponse);
+            var detectionResults = JsonConvert.DeserializeObject<List<LanguageDetectionResult>>(jsonResponse);
 
-            return Ok(detectionResult);
+            return Ok(detectionResults);
         }
         catch (Exception ex)
         {
