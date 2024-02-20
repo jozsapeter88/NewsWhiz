@@ -26,7 +26,7 @@ function BookmarkPage() {
   useEffect(() => {
     const fetchBookmarks = async () => {
       try {
-        if (!user) return; // Return early if user is null
+        if (!user) return;
         const response = await fetch(
           `http://localhost:5092/api/Bookmark/GetBookmarks/${user.id}`
         );
@@ -61,9 +61,31 @@ function BookmarkPage() {
     setShowConfirmationModal(false);
   };
 
-  const handleDeleteBookmark = () => {
-    console.log(`Deleting bookmark with ID: ${selectedBookmark.id}`);
-    handleCloseModal();
+  const handleDeleteBookmark = async () => {
+    try {
+      console.log(`Deleting bookmark with ID: ${selectedBookmark.id}`);
+      const response = await fetch(`http://localhost:5092/api/Bookmark/${selectedBookmark.id}`, {
+        method: 'DELETE',
+      });
+  
+      if (response.ok) {
+        // Bookmark deleted successfully
+        // Remove the deleted bookmark from the bookmarks list
+        const updatedBookmarks = bookmarks.filter(bookmark => bookmark.id !== selectedBookmark.id);
+        setBookmarks(updatedBookmarks);
+      } else {
+        // Handle error response
+        console.error('Error deleting bookmark:', response.statusText);
+        // Display an error message to the user
+      }
+    } catch (error) {
+      // Handle network errors
+      console.error('Error deleting bookmark:', error.message);
+      // Display an error message to the user
+    } finally {
+      // Close the confirmation modal
+      handleCloseModal();
+    }
   };
 
   return (
