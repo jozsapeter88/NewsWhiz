@@ -57,6 +57,29 @@ function BookmarkId() {
     fetchBookmark();
   }, [id]);
 
+  const handleDetectLanguageClick = async () => {
+    try {
+        const response = await fetch("http://localhost:5092/api/LanguageDetection", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                text: bookmark.text
+            })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log("Language detection result:", data);
+        } else {
+            console.error("Error detecting language:", response.statusText);
+        }
+    } catch (error) {
+        console.error("Error detecting language:", error);
+    }
+  }
+
   const handleTranslateClick = () => {
     setShowModal(true);
   };
@@ -145,6 +168,9 @@ function BookmarkId() {
             </Dropdown.Toggle>
 
             <Dropdown.Menu>
+            <Dropdown.Item onClick={handleDetectLanguageClick}>
+                Detect language
+              </Dropdown.Item>
               <Dropdown.Item onClick={handleTranslateClick}>
                 Translate
               </Dropdown.Item>

@@ -3,41 +3,31 @@ import React, { useState, useEffect } from "react";
 const SummaryComponent = ({toggleAccordion, activeAccordion, cleanedArticle}) => {
     const [summaryResult, setSummaryResult] = useState("");
 
-    const summarizeText = async () => {
-        console.log("Cleaned Article:", cleanedArticle);
-    
-        const url =
-          "https://text-analysis12.p.rapidapi.com/summarize-text/api/v1.1";
-        const options = {
-          method: "POST",
+    const summarizeText = async (text, summaryPercent) => {
+      try {
+        const response = await fetch('http://localhost:5092/api/Summarization', {
+          method: 'POST',
           headers: {
-            "content-type": "application/json",
-            "X-RapidAPI-Key": "21ab335ba4msh85f8c88bb6ae3f6p14ac31jsn78a47852eb0d",
-            "X-RapidAPI-Host": "text-analysis12.p.rapidapi.com",
+            'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            language: "english",
-            summary_percent: 10,
-            text: cleanedArticle,
+            text: text,
+            summaryPercent: summaryPercent,
           }),
-        };
+        });
     
-        try {
-          const response = await fetch(url, options);
-          const result = await response.json();
-    
-          console.log("Summarization Request:", options);
-          console.log("Summarization Result:", result);
-    
-          if (result.ok) {
-            setSummaryResult(result.summary);
-          } else {
-            console.error("Error in summarization:", result.msg);
-          }
-        } catch (error) {
-          console.error(error);
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
         }
-      };
+    
+        const data = await response.json();
+        setSummaryResult(data.summary); // Update the summaryResult state with the fetched summarized text
+      } catch (error) {
+        console.error('Error:', error);
+        // Handle error, display error message, etc.
+      }
+    };
+    
 
   return (
     <>
@@ -45,7 +35,7 @@ const SummaryComponent = ({toggleAccordion, activeAccordion, cleanedArticle}) =>
         <button
           onClick={() => {
             toggleAccordion(0);
-            summarizeText();
+            summarizeText(cleanedArticle, 10); // Pass the cleanedArticle and desired summary percentage
           }}
         >
           Summarize

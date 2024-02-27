@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import "./BookmarkPage.css";
 import { useDarkMode } from "../../../Contexts/DarkModeContext";
 import { IoCloseCircle } from "react-icons/io5";
+import TranslateModal from "./BookmarkTranslateModal";
 
 function BookmarkPage() {
   const { user } = useAuth();
@@ -25,7 +26,7 @@ function BookmarkPage() {
   useEffect(() => {
     const fetchBookmarks = async () => {
       try {
-        if (!user) return; // Return early if user is null
+        if (!user) return;
         const response = await fetch(
           `http://localhost:5092/api/Bookmark/GetBookmarks/${user.id}`
         );
@@ -39,7 +40,7 @@ function BookmarkPage() {
         console.error("Error fetching bookmarks:", error);
       }
     };
-  
+
     fetchBookmarks();
   }, [user]);
 
@@ -60,9 +61,29 @@ function BookmarkPage() {
     setShowConfirmationModal(false);
   };
 
-  const handleDeleteBookmark = () => {
-    console.log(`Deleting bookmark with ID: ${selectedBookmark.id}`);
-    handleCloseModal();
+  const handleDeleteBookmark = async () => {
+    try {
+      console.log(`Deleting bookmark with ID: ${selectedBookmark.id}`);
+      const response = await fetch(
+        `http://localhost:5092/api/Bookmark/${selectedBookmark.id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (response.ok) {
+        const updatedBookmarks = bookmarks.filter(
+          (bookmark) => bookmark.id !== selectedBookmark.id
+        );
+        setBookmarks(updatedBookmarks);
+      } else {
+        console.error("Error deleting bookmark:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error deleting bookmark:", error.message);
+    } finally {
+      handleCloseModal();
+    }
   };
 
   return (

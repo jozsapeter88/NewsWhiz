@@ -26,34 +26,30 @@ public class BookmarkService : IBookmarkService
     {
         try
         {
-            // Check if the bookmark with the given id exists
             var existingBookmark = await _dbContext.Bookmarks.FirstOrDefaultAsync(b => b.Id == id);
 
             if (existingBookmark == null)
             {
-                return false; // Bookmark with the given ID not found
+                return false;
             }
 
-            // Ensure the UserId is the same as the current user's Id
             if (!string.IsNullOrEmpty(request.UserId) && request.UserId != userId)
             {
-                return false; // Invalid UserId
+                return false;
             }
 
-            // Only update the 'Text' property if it is different from the original
             if (!string.IsNullOrEmpty(request.Text) && existingBookmark.Text != request.Text)
             {
                 existingBookmark.Text = request.Text;
                 await _dbContext.SaveChangesAsync();
             }
 
-            return true; // Bookmark edited successfully
+            return true;
         }
         catch (Exception ex)
         {
-            // Log the error to a more comprehensive logging system
             Console.Error.WriteLine($"Error updating bookmark: {ex.Message}");
-            return false; // Internal Server Error
+            return false;
         }
     }
 
@@ -66,32 +62,76 @@ public class BookmarkService : IBookmarkService
     {
         return await _dbContext.Bookmarks.FindAsync(id);
     }
-    
-    public async Task<bool> UpdateTranslatedTextAsync(int id, string translatedText)
+
+    public async Task<bool> DeleteBookmarkAsync(int id)
     {
         try
         {
-            // Retrieve the bookmark by its ID
             var bookmark = await _dbContext.Bookmarks.FindAsync(id);
 
             if (bookmark == null)
             {
-                return false; // Bookmark with the given ID not found
+                return false;
             }
 
-            // Update the translated text
-            bookmark.Text = translatedText;
+            _dbContext.Bookmarks.Remove(bookmark);
 
-            // Save the changes to the database
             await _dbContext.SaveChangesAsync();
 
-            return true; // Translated text updated successfully
+            return true;
         }
         catch (Exception ex)
         {
-            // Log the error to a more comprehensive logging system
+            Console.Error.WriteLine($"Error deleting bookmark: {ex.Message}");
+            return false;
+        }
+    }
+
+    public async Task<bool> UpdateTranslatedTextAsync(int id, string translatedText)
+    {
+        try
+        {
+            var bookmark = await _dbContext.Bookmarks.FindAsync(id);
+
+            if (bookmark == null)
+            {
+                return false;
+            }
+
+            bookmark.Text = translatedText;
+
+            await _dbContext.SaveChangesAsync();
+
+            return true;
+        }
+        catch (Exception ex)
+        {
             Console.Error.WriteLine($"Error updating translated text: {ex.Message}");
-            return false; // Internal Server Error
+            return false;
+        }
+    }
+
+    public async Task<bool> UpdateSummarizerTextAsync(int id, string text)
+    {
+        try
+        {
+            var existingBookmark = await _dbContext.Bookmarks.FirstOrDefaultAsync(b => b.Id == id);
+
+            if (existingBookmark == null)
+            {
+                return false;
+            }
+
+            existingBookmark.Text = text;
+
+            await _dbContext.SaveChangesAsync();
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error updating summarizer text: {ex.Message}");
+            throw;
         }
     }
 }

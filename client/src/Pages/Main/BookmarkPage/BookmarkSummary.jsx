@@ -79,8 +79,6 @@ function BookmarkSummary() {
   };
 
   const handleSummarization = async (bookmark) => {
-    console.log("Bookmark text:", bookmark.text);
-
     const url =
       "https://text-analysis12.p.rapidapi.com/summarize-text/api/v1.1";
     const options = {
@@ -102,6 +100,7 @@ function BookmarkSummary() {
       const result = await response.json();
 
       if (response.ok) {
+        console.log(result)
         await setSummaryResult(result.summary);
       } else {
         console.error("Error in summarization:", result.msg);
@@ -118,9 +117,12 @@ function BookmarkSummary() {
   };
 
   const handleOkButtonClick = () => {
-    setSummaryPercent(selectedPercentage);
-    handleSummarization();
-  };
+    if (bookmark && bookmark.text) {
+        setSummaryPercent(selectedPercentage);
+        handleSummarization(bookmark);
+    }
+};
+
 
   return (
     <>
@@ -169,7 +171,7 @@ function BookmarkSummary() {
 
               <Card className="w-50 mx-auto">
                 <Card.Body>
-                  <Card.Text>{bookmark?.text || "No text available"}</Card.Text>
+                <Card.Text>{summaryResult || (bookmark?.text || "No text available")}</Card.Text>
                 </Card.Body>
               </Card>
 

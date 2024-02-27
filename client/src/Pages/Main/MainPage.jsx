@@ -208,11 +208,13 @@ function MainPage() {
       <div className={`main-container ${isDarkMode ? "dark-mode" : ""}`}>
         {showAlert && (
           <Alert
+            style={{width:"60%", margin:"auto"}}
             variant="warning"
             onClose={() => setShowAlert(false)}
             dismissible
           >
-            During development, the application only supports some news sites.{" "}
+            During development, the application only supports some news sites.<br></br>
+            Also, the translation and summarization function only works with english as the source language.{" "}
             <Alert.Link
               onClick={() =>
                 setUrl(

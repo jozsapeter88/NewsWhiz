@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using server.Areas.Identity.Data.Models;
 using server.Models;
 using server.Models.DBContext;
+using server.Models.Summarization;
+using server.Models.Translation;
 using server.Services;
 
 namespace server.Controllers
@@ -97,7 +99,30 @@ namespace server.Controllers
                 return StatusCode(500, "Internal Server Error");
             }
         }
-        
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteBookmark(int id)
+        {
+            try
+            {
+                var success = await _bookmarkService.DeleteBookmarkAsync(id);
+
+                if (success)
+                {
+                    return Ok(new { Message = "Bookmark deleted successfully" });
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error deleting bookmark: {ex.Message}");
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
+
         [HttpPut("UpdateTranslatedText/{id}")]
         public async Task<IActionResult> UpdateTranslatedText(int id, [FromBody] TranslationRequest request)
         {
@@ -117,6 +142,30 @@ namespace server.Controllers
             catch (Exception ex)
             {
                 Console.Error.WriteLine($"Error updating translated text: {ex.Message}");
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
+
+        [HttpPut("UpdateSummarizerText/{id}")]
+        public async Task<IActionResult> UpdateSummarizerText(int id, [FromBody] SummarizationRequest request)
+        {
+            try
+            {
+                // Call the service method to update the summarizer text
+                var success = await _bookmarkService.UpdateSummarizerTextAsync(id, request.Text);
+
+                if (success)
+                {
+                    return Ok(new { Message = "Summarized text updated successfully" });
+                }
+                else
+                {
+                    return NotFound(); // Bookmark with the given ID not found
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Error updating summarizer text: {ex.Message}");
                 return StatusCode(500, "Internal Server Error");
             }
         }

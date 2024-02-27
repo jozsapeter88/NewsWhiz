@@ -10,5 +10,6 @@ public interface IBookmarkService
     Task<Bookmark> GetBookmarkByIdAsync(int id);
     Task<bool> EditBookmarkAsync(int id, BookmarkEditRequest request, string userId);
     Task<bool> UpdateTranslatedTextAsync(int id, string translatedText);
-
+    Task<bool> UpdateSummarizerTextAsync(int id, string text);
+    Task<bool> DeleteBookmarkAsync(int id);
 }
